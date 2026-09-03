@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Profile | RootLine</title>
+</head>
+<body>
+
+<h2>My Profile</h2>
+
+<p>Name: {{ user.first_name }} {{ user.last_name }}</p>
+<p>Username: {{ user.username }}</p>
+<p>Email: {{ user.email }}</p>
+<p>Phone: {{ user.phone_number }}</p>
+<p>Address: {{ user.address }}</p>
+
+<h3>Seller Status</h3>
+
+{% if user.seller_approved %}
+
+    <p>Seller Status: Approved</p>
+
+    <a href="{% url 'seller_dashboard' %}">
+        Go to Seller Dashboard
+    </a>
+
+{% elif user.seller_requested %}
+
+    <p>Seller Status: Pending Approval</p>
+
+{% else %}
+
+    <p>Seller Status: Not a Seller</p>
+
+    <form method="POST" action="{% url 'become_seller' %}">
+        {% csrf_token %}
+        <button type="submit">Become a Seller</button>
+    </form>
+
+{% endif %}
+
+<br>
+
+<a href="{% url 'edit_profile' %}">Edit Profile</a>
+
+<br><br>
+
+<a href="{% url 'change_password' %}">Change Password</a>
+
+<br><br>
+
+<form method="POST" action="{% url 'logout' %}">
+    {% csrf_token %}
+    <button type="submit">Logout</button>
+</form>
+
+</body>
+</html>
