@@ -48,6 +48,8 @@
 
 <br><br>
 
+<a href="{% url 'my_orders' %}">My Orders</a>
+<br><br>
 <form method="POST" action="{% url 'logout' %}">
     {% csrf_token %}
     <button type="submit">Logout</button>

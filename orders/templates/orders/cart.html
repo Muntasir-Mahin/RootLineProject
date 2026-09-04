@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Cart | RootLine</title>
+</head>
+<body>
+
+<h2>My Cart</h2>
+
+{% if cart_items %}
+
+    {% for item in cart_items %}
+
+        <hr>
+
+        <h3>{{ item.product.name }}</h3>
+
+        <p>Seller: {{ item.product.seller.username }}</p>
+
+        <p>
+            Price:
+            ৳{{ item.product.price }}
+            per {{ item.product.get_unit_display }}
+        </p>
+
+        <form method="POST" action="{% url 'update_cart_item' item.id %}">
+            {% csrf_token %}
+
+            <label>Quantity:</label>
+
+            <input
+                type="number"
+                name="quantity"
+                value="{{ item.quantity }}"
+                min="0.01"
+                step="0.01"
+                max="{{ item.product.stock_quantity }}"
+                required
+            >
+
+            {{ item.product.get_unit_display }}
+
+            <button type="submit">Update</button>
+        </form>
+
+        <p>
+            Subtotal:
+            ৳{% widthratio item.product.price 1 item.quantity %}
+        </p>
+
+        <form method="POST" action="{% url 'remove_cart_item' item.id %}">
+            {% csrf_token %}
+            <button type="submit">Remove</button>
+        </form>
+
+    {% endfor %}
+
+    <hr>
+
+    <h3>Total: ৳{{ total_price }}</h3>
+
+    <br>
+
+    <a href="{% url 'checkout' %}">
+        Proceed to Checkout
+    </a>
+
+{% else %}
+
+    <p>Your cart is empty.</p>
+
+{% endif %}
+
+<br><br>
+
+<a href="{% url 'marketplace' %}">
+    Continue Shopping
+</a>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Checkout | RootLine</title>
+</head>
+<body>
+
+<h2>Checkout</h2>
+
+<h3>Order Summary</h3>
+
+{% for item in cart_items %}
+
+    <p>
+        {{ item.product.name }}
+        -
+        {{ item.quantity }}
+        {{ item.product.get_unit_display }}
+        -
+        ৳{{ item.product.price }}
+    </p>
+
+{% endfor %}
+
+<hr>
+
+<h3>Total: ৳{{ total_price }}</h3>
+
+<h3>Delivery & Payment Information</h3>
+
+<form method="POST">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Place Order</button>
+</form>
+
+<br>
+
+<a href="{% url 'cart' %}">
+    Back to Cart
+</a>
+
+</body>
+</html>

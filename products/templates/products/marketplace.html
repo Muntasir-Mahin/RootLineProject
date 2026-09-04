@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Marketplace | RootLine</title>
+</head>
+<body>
+
+<h2>RootLine Marketplace</h2>
+
+{% if products %}
+
+    {% for product in products %}
+
+        <hr>
+
+        {% if product.image %}
+            <img src="{{ product.image.url }}" width="200">
+        {% endif %}
+
+        <h3>{{ product.name }}</h3>
+
+        <p>Seller: {{ product.seller.username }}</p>
+
+        <p>Category: {{ product.category }}</p>
+
+        <p>
+            Price:
+            {% if product.price %}
+                ৳{{ product.price }}
+            {% else %}
+                Bidding Only
+            {% endif %}
+        </p>
+
+        <p>
+            Stock:
+            {{ product.stock_quantity }}
+            {{ product.get_unit_display }}
+        </p>
+
+        <p>
+            Selling Type:
+            {{ product.get_selling_type_display }}
+        </p>
+
+        <p>Organic Verification: Verified</p>
+
+         <a href="{% url 'marketplace_product_detail' product.id %}">
+    View Details
+</a>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No verified products are available right now.</p>
+
+{% endif %}
+
+</body>
+</html>

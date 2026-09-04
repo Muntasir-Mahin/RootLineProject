@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Add Product | RootLine</title>
+</head>
+<body>
+
+<h2>Add Product</h2>
+
+<form method="POST" enctype="multipart/form-data">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">Add Product</button>
+</form>
+
+<br>
+
+<a href="{% url 'seller_dashboard' %}">Back to Seller Dashboard</a>
+
+</body>
+</html>

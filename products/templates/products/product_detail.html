@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }} | RootLine</title>
+</head>
+<body>
+
+<h2>{{ product.name }}</h2>
+
+<p>Seller: {{ product.seller.username }}</p>
+<p>Category: {{ product.category }}</p>
+
+<p>Description:</p>
+<p>{{ product.description }}</p>
+
+<p>
+    Price:
+    {% if product.price %}
+        ৳{{ product.price }}
+    {% else %}
+        No fixed price
+    {% endif %}
+</p>
+
+<p>
+    Stock:
+    {{ product.stock_quantity }}
+    {{ product.get_unit_display }}
+</p>
+
+<p>
+    Selling Type:
+    {{ product.get_selling_type_display }}
+</p>
+
+<p>
+    Verification Status:
+    {{ product.get_verification_status_display }}
+</p>
+
+<p>
+    Available:
+    {{ product.is_available }}
+</p>
+
+{% if product.image %}
+    <img src="{{ product.image.url }}" width="250">
+{% endif %}
+
+<br><br>
+
+<a href="{% url 'edit_product' product.id %}">
+    Edit Product
+</a>
+
+<br><br>
+
+<a href="{% url 'my_products' %}">
+    Back to My Products
+</a>
+
+</body>
+</html>

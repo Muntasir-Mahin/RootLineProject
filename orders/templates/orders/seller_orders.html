@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seller Orders | RootLine</title>
+</head>
+<body>
+
+<h2>Incoming Orders</h2>
+
+{% if orders %}
+
+    {% for order in orders %}
+
+        <hr>
+
+        <h3>Order #{{ order.id }}</h3>
+
+        <p>Buyer: {{ order.buyer.username }}</p>
+        <p>Recipient: {{ order.recipient_name }}</p>
+        <p>Email: {{ order.email }}</p>
+        <p>Phone: {{ order.phone_number }}</p>
+        <p>Address: {{ order.delivery_address }}</p>
+
+        <p>
+            Payment Method:
+            {{ order.get_payment_method_display }}
+        </p>
+
+        <p>
+            Status:
+            {{ order.get_status_display }}
+        </p>
+
+        {% if order.status == 'pending' %}
+
+    <form method="POST"
+          action="{% url 'update_order_status' order.id %}">
+        {% csrf_token %}
+
+        <button type="submit" name="action" value="confirm">
+            Confirm Order
+        </button>
+
+        <button type="submit" name="action" value="cancel">
+            Cancel Order
+        </button>
+    </form>
+
+{% elif order.status == 'confirmed' %}
+
+    <form method="POST"
+          action="{% url 'update_order_status' order.id %}">
+        {% csrf_token %}
+
+        <button type="submit" name="action" value="ship">
+            Mark as Shipped
+        </button>
+    </form>
+
+{% elif order.status == 'shipped' %}
+
+    <p>Waiting for buyer to confirm delivery.</p>
+
+{% elif order.status == 'delivered' %}
+
+    <p>Order completed.</p>
+
+{% elif order.status == 'cancelled' %}
+
+    <p>Order cancelled.</p>
+
+{% endif %}
+
+        <h4>Items</h4>
+
+        {% for item in order.items.all %}
+
+            <p>
+                {{ item.product_name }}
+                -
+                {{ item.quantity }}
+                {{ item.unit }}
+                -
+                ৳{{ item.price }}
+            </p>
+
+        {% endfor %}
+
+        <p>
+            <strong>Total: ৳{{ order.total_amount }}</strong>
+        </p>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No orders received yet.</p>
+
+{% endif %}
+
+</body>
+</html>
