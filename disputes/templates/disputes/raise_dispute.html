@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Raise Dispute | RootLine</title>
+</head>
+<body>
+
+<h2>Raise Dispute</h2>
+
+<p>
+    Order:
+    #{{ order.id }}
+</p>
+
+<p>
+    Seller:
+    {{ order.seller.username }}
+</p>
+
+<p>
+    Order Amount:
+    ৳{{ order.total_amount }}
+</p>
+
+<p>
+    Order Status:
+    {{ order.get_status_display }}
+</p>
+
+<hr>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Submit Dispute
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'my_orders' %}">
+    Back to My Orders
+</a>
+
+</body>
+</html>
