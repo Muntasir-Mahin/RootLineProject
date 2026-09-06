@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auction Checkout | RootLine</title>
+</head>
+<body>
+
+<h2>Auction Winner Checkout</h2>
+
+<h3>{{ product.name }}</h3>
+
+<p>
+    Congratulations!
+    You won this auction.
+</p>
+
+<p>
+    Winning Bid:
+    <strong>৳{{ auction.winning_bid }}</strong>
+</p>
+
+<p>
+    Seller:
+    {{ product.seller.username }}
+</p>
+
+<hr>
+
+<h3>Delivery & Payment Information</h3>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Complete Auction Purchase
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'auction_detail' auction.id %}">
+    Back to Auction
+</a>
+
+</body>
+</html>

@@ -7,7 +7,9 @@
 
 <h2>My Products</h2>
 
-<a href="{% url 'add_product' %}">Add New Product</a>
+<a href="{% url 'add_product' %}">
+    Add New Product
+</a>
 
 <br><br>
 
@@ -19,7 +21,10 @@
 
         <h3>{{ product.name }}</h3>
 
-        <p>Category: {{ product.category }}</p>
+        <p>
+            Category:
+            {{ product.category }}
+        </p>
 
         <p>
             Price:
@@ -52,10 +57,10 @@
         </p>
 
         <a href="{% url 'product_detail' product.id %}">
-    View Details
-</a>
+            View Details
+        </a>
 
-<br><br>
+        <br><br>
 
         <a href="{% url 'edit_product' product.id %}">
             Edit Product
@@ -67,11 +72,57 @@
             Delete Product
         </a>
 
+
+        <!-- AUCTION SECTION -->
+
+        {% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
+
+            <br><br>
+
+            {% if product.auction %}
+
+                <p>
+                    Auction Status:
+                    <strong>
+                        {{ product.auction.get_status_display }}
+                    </strong>
+                </p>
+
+                <p>
+                    Start Time:
+                    {{ product.auction.start_time }}
+                </p>
+
+                <p>
+                    End Time:
+                    {{ product.auction.end_time }}
+                </p>
+
+                {% if product.auction.status == 'upcoming' %}
+
+                    <a href="{% url 'edit_auction' product.auction.id %}">
+                        Edit Auction
+                    </a>
+
+                {% endif %}
+
+            {% else %}
+
+                <a href="{% url 'create_auction' product.id %}">
+                    Create Auction
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+
     {% endfor %}
 
 {% else %}
 
-    <p>You have not added any products yet.</p>
+    <p>
+        You have not added any products yet.
+    </p>
 
 {% endif %}
 

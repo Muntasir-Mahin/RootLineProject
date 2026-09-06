@@ -4,71 +4,11 @@ from django.utils import timezone
 from .models import Payment
 
 
-@admin.action(description='Verify payment and hold in escrow')
-def verify_payment(modeladmin, request, queryset):
-
-    verified_count = 0
-
-    for payment in queryset.select_related('order'):
-
-        if (
-            payment.payment_status == 'verification_pending'
-            and payment.transaction_id
-            and payment.order.status != 'cancelled'
-        ):
-            payment.payment_status = 'paid'
-            payment.escrow_status = 'held'
-            payment.paid_at = timezone.now()
-
-            payment.save(
-                update_fields=[
-                    'payment_status',
-                    'escrow_status',
-                    'paid_at',
-                ]
-            )
-
-            verified_count += 1
-
-    modeladmin.message_user(
-        request,
-        f'{verified_count} payment(s) verified.'
-    )
-
-
-@admin.action(description='Mark payment as failed')
-def mark_payment_failed(modeladmin, request, queryset):
-
-    failed_count = 0
-
-    for payment in queryset:
-
-        if payment.payment_status == 'verification_pending':
-
-            payment.payment_status = 'failed'
-            payment.escrow_status = 'not_held'
-            payment.paid_at = None
-
-            payment.save(
-                update_fields=[
-                    'payment_status',
-                    'escrow_status',
-                    'paid_at',
-                ]
-            )
-
-            failed_count += 1
-
-    modeladmin.message_user(
-        request,
-        f'{failed_count} payment(s) marked as failed.'
-    )
-
-
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
 
     list_display = (
+        'id',
         'order',
         'amount',
         'transaction_id',
@@ -83,21 +23,81 @@ class PaymentAdmin(admin.ModelAdmin):
     )
 
     search_fields = (
-        'order__id',
-        'order__buyer__username',
         'transaction_id',
+        'order__buyer__username',
+        'order__seller__username',
     )
 
+    # Payment Status + Escrow Status duita-i editable
     readonly_fields = (
-        'payment_status',
-        'escrow_status',
         'commission_amount',
         'seller_amount',
         'paid_at',
         'released_at',
     )
 
-    actions = [
-        verify_payment,
-        mark_payment_failed,
-    ]
+    actions = (
+        'verify_payment',
+        'mark_payment_failed',
+    )
+
+    def save_model(self, request, obj, form, change):
+
+        if obj.payment_status == 'paid':
+            if not obj.paid_at:
+                obj.paid_at = timezone.now()
+
+        elif obj.payment_status in (
+            'pending',
+            'verification_pending',
+            'failed',
+        ):
+            obj.paid_at = None
+
+        super().save_model(
+            request,
+            obj,
+            form,
+            change
+        )
+
+    @admin.action(description='Verify selected payments')
+    def verify_payment(self, request, queryset):
+
+        for payment in queryset:
+
+            if (
+                payment.payment_status == 'verification_pending'
+                and payment.transaction_id
+                and payment.order.status != 'cancelled'
+            ):
+                payment.payment_status = 'paid'
+                payment.escrow_status = 'held'
+                payment.paid_at = timezone.now()
+
+                payment.save(
+                    update_fields=[
+                        'payment_status',
+                        'escrow_status',
+                        'paid_at',
+                    ]
+                )
+
+    @admin.action(description='Mark selected payments as failed')
+    def mark_payment_failed(self, request, queryset):
+
+        for payment in queryset:
+
+            if payment.payment_status == 'verification_pending':
+
+                payment.payment_status = 'failed'
+                payment.escrow_status = 'not_held'
+                payment.paid_at = None
+
+                payment.save(
+                    update_fields=[
+                        'payment_status',
+                        'escrow_status',
+                        'paid_at',
+                    ]
+                )

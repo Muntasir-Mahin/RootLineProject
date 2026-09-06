@@ -4,13 +4,15 @@ from .models import Product
 
 @admin.register(Product)
 class ProductAdmin(admin.ModelAdmin):
+
     list_display = (
+        'id',
         'name',
         'seller',
-        'category',
         'selling_type',
-        'verification_status',
+        'price',
         'stock_quantity',
+        'verification_status',
         'is_available',
     )
 
@@ -18,7 +20,6 @@ class ProductAdmin(admin.ModelAdmin):
         'selling_type',
         'verification_status',
         'is_available',
-        'category',
     )
 
     search_fields = (
@@ -26,3 +27,20 @@ class ProductAdmin(admin.ModelAdmin):
         'seller__username',
         'category',
     )
+
+    actions = [
+        'verify_products',
+        'reject_products',
+    ]
+
+    @admin.action(description='Verify selected products')
+    def verify_products(self, request, queryset):
+        queryset.update(
+            verification_status='verified'
+        )
+
+    @admin.action(description='Reject selected products')
+    def reject_products(self, request, queryset):
+        queryset.update(
+            verification_status='rejected'
+        )

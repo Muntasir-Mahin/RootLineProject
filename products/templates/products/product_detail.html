@@ -8,6 +8,7 @@
 <h2>{{ product.name }}</h2>
 
 <p>Seller: {{ product.seller.username }}</p>
+
 <p>Category: {{ product.category }}</p>
 
 <p>Description:</p>
@@ -18,7 +19,7 @@
     {% if product.price %}
         ৳{{ product.price }}
     {% else %}
-        No fixed price
+        No Fixed Price
     {% endif %}
 </p>
 
@@ -44,10 +45,102 @@
 </p>
 
 {% if product.image %}
-    <img src="{{ product.image.url }}" width="250">
+    <img src="{{ product.image.url }}" width="300">
 {% endif %}
 
-<br><br>
+
+<!-- AUCTION INFORMATION -->
+
+{% if auction %}
+
+    <hr>
+
+    <h3>Auction Information</h3>
+
+    <p>
+        Auction Status:
+        <strong>{{ auction.get_status_display }}</strong>
+    </p>
+
+    <p>
+        Starting Price:
+        ৳{{ auction.starting_price }}
+    </p>
+
+    <p>
+        Minimum Increment:
+        ৳{{ auction.minimum_increment }}
+    </p>
+
+    <p>
+        Start Time:
+        {{ auction.start_time }}
+    </p>
+
+    <p>
+        End Time:
+        {{ auction.end_time }}
+    </p>
+
+
+    <h3>Current Highest Bid</h3>
+
+    {% if highest_bid %}
+
+        <p>
+            Highest Bid:
+            <strong>৳{{ highest_bid.amount }}</strong>
+        </p>
+
+        <p>
+            Highest Bidder:
+            <strong>{{ highest_bid.bidder.username }}</strong>
+        </p>
+
+        <p>
+            Bid Time:
+            {{ highest_bid.created_at }}
+        </p>
+
+    {% else %}
+
+        <p>No bids have been placed yet.</p>
+
+    {% endif %}
+
+
+    <h3>Bid History</h3>
+
+    {% for bid in bids %}
+
+        <p>
+            Bidder:
+            {{ bid.bidder.username }}
+            |
+            Amount:
+            ৳{{ bid.amount }}
+            |
+            Time:
+            {{ bid.created_at }}
+        </p>
+
+    {% empty %}
+
+        <p>No bid history available.</p>
+
+    {% endfor %}
+
+
+    <p>
+        <a href="{% url 'auction_detail' auction.id %}">
+            View Full Auction
+        </a>
+    </p>
+
+{% endif %}
+
+
+<br>
 
 <a href="{% url 'edit_product' product.id %}">
     Edit Product
