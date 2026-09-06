@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Products | RootLine</title>
+</head>
+<body>
+
+<h2>My Products</h2>
+
+<a href="{% url 'add_product' %}">
+    Add New Product
+</a>
+
+<br><br>
+
+{% if products %}
+
+    {% for product in products %}
+
+        <hr>
+
+        <h3>{{ product.name }}</h3>
+
+        <p>
+            Category:
+            {{ product.category }}
+        </p>
+
+        <p>
+            Price:
+            {% if product.price %}
+                ৳{{ product.price }}
+            {% else %}
+                No fixed price
+            {% endif %}
+        </p>
+
+        <p>
+            Stock:
+            {{ product.stock_quantity }}
+            {{ product.get_unit_display }}
+        </p>
+
+        <p>
+            Selling Type:
+            {{ product.get_selling_type_display }}
+        </p>
+
+        <p>
+            Verification:
+            {{ product.get_verification_status_display }}
+        </p>
+
+        <p>
+            Available:
+            {{ product.is_available }}
+        </p>
+
+        <a href="{% url 'product_detail' product.id %}">
+            View Details
+        </a>
+
+        <br><br>
+
+        <a href="{% url 'edit_product' product.id %}">
+            Edit Product
+        </a>
+
+        <br><br>
+
+        <a href="{% url 'delete_product' product.id %}">
+            Delete Product
+        </a>
+
+
+        <!-- AUCTION SECTION -->
+
+        {% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
+
+            <br><br>
+
+            {% if product.auction %}
+
+                <p>
+                    Auction Status:
+                    <strong>
+                        {{ product.auction.get_status_display }}
+                    </strong>
+                </p>
+
+                <p>
+                    Start Time:
+                    {{ product.auction.start_time }}
+                </p>
+
+                <p>
+                    End Time:
+                    {{ product.auction.end_time }}
+                </p>
+
+                {% if product.auction.status == 'upcoming' %}
+
+                    <a href="{% url 'edit_auction' product.auction.id %}">
+                        Edit Auction
+                    </a>
+
+                {% endif %}
+
+            {% else %}
+
+                <a href="{% url 'create_auction' product.id %}">
+                    Create Auction
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        You have not added any products yet.
+    </p>
+
+{% endif %}
+
+<br><br>
+
+<a href="{% url 'seller_dashboard' %}">
+    Back to Seller Dashboard
+</a>
+
+</body>
+</html>

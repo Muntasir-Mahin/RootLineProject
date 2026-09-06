@@ -7,11 +7,37 @@
 
 <h2>Seller Dashboard</h2>
 
-<p>Welcome, {{ user.first_name }} {{ user.last_name }}</p>
+<p>Welcome, {{ user.get_full_name|default:user.username }}</p>
 
 <p>You are an approved RootLine seller.</p>
 
-<a href="{% url 'profile' %}">Back to Profile</a>
+<hr>
+
+<h3>Seller Options</h3>
+
+<p>
+    <a href="{% url 'add_product' %}">
+        Add Product
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'my_products' %}">
+        My Products
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'seller_orders' %}">
+        View Incoming Orders
+    </a>
+</p>
+
+<hr>
+
+<a href="{% url 'profile' %}">
+    Back to Profile
+</a>
 
 </body>
 </html>

@@ -13,6 +13,35 @@
 <p>Phone: {{ user.phone_number }}</p>
 <p>Address: {{ user.address }}</p>
 
+<hr>
+
+<h3>Quick Links</h3>
+
+<p>
+    <a href="{% url 'marketplace' %}">
+        Marketplace
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'cart' %}">
+        My Cart
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'my_orders' %}">
+        My Orders
+    </a>
+</p>
+
+<p>
+    <a href="{% url 'auction_list' %}">
+        Auctions
+    </a>
+</p>
+<hr>
+
 <h3>Seller Status</h3>
 
 {% if user.seller_approved %}
@@ -38,13 +67,17 @@
 
 {% endif %}
 
-<br>
+<hr>
 
-<a href="{% url 'edit_profile' %}">Edit Profile</a>
+<a href="{% url 'edit_profile' %}">
+    Edit Profile
+</a>
 
 <br><br>
 
-<a href="{% url 'change_password' %}">Change Password</a>
+<a href="{% url 'change_password' %}">
+    Change Password
+</a>
 
 <br><br>
 

@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }} | RootLine</title>
+</head>
+<body>
+
+<h2>{{ product.name }}</h2>
+
+{% if product.image %}
+    <img src="{{ product.image.url }}" width="300">
+{% endif %}
+
+<p>
+    Seller:
+    {{ product.seller.username }}
+</p>
+
+<p>
+    Category:
+    {{ product.category }}
+</p>
+
+<p>Description:</p>
+<p>{{ product.description }}</p>
+
+<p>
+    Price:
+    {% if product.price %}
+        ৳{{ product.price }}
+    {% else %}
+        No Fixed Price
+    {% endif %}
+</p>
+
+<p>
+    Stock:
+    {{ product.stock_quantity }}
+    {{ product.get_unit_display }}
+</p>
+
+<p>
+    Selling Type:
+    {{ product.get_selling_type_display }}
+</p>
+
+<p>
+    Organic Verification:
+    Verified
+</p>
+
+
+<!-- FIXED PRICE PURCHASE SECTION -->
+
+{% if product.selling_type == 'fixed' or product.selling_type == 'both' %}
+
+    <hr>
+
+    <h3>Buy This Product</h3>
+
+    <form method="POST"
+          action="{% url 'add_to_cart' product.id %}">
+
+        {% csrf_token %}
+
+        <label>Quantity:</label>
+
+        <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="0.01"
+            step="0.01"
+            max="{{ product.stock_quantity }}"
+            required
+        >
+
+        {{ product.get_unit_display }}
+
+        <br><br>
+
+        <button type="submit">
+            Add to Cart
+        </button>
+
+    </form>
+
+{% endif %}
+
+
+<!-- AUCTION / BIDDING SECTION -->
+
+{% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
+
+    <hr>
+
+    <h3>Auction</h3>
+
+    {% if auction %}
+
+        <p>
+            Starting Price:
+            ৳{{ auction.starting_price }}
+        </p>
+
+        <p>
+            Minimum Increment:
+            ৳{{ auction.minimum_increment }}
+        </p>
+
+        <p>
+            Start Time:
+            {{ auction.start_time }}
+        </p>
+
+        <p>
+            End Time:
+            {{ auction.end_time }}
+        </p>
+
+        <p>
+            Auction Status:
+            {{ auction.get_status_display }}
+        </p>
+
+        {% if auction_is_active %}
+
+            <a href="{% url 'auction_detail' auction.id %}">
+                View Auction / Place Bid
+            </a>
+
+        {% elif auction.status == 'upcoming' %}
+
+            <p>
+                Auction has not started yet.
+            </p>
+
+            <a href="{% url 'auction_detail' auction.id %}">
+                View Auction
+            </a>
+
+        {% elif auction.status == 'ended' %}
+
+            <p>
+                This auction has ended.
+            </p>
+
+        {% elif auction.status == 'cancelled' %}
+
+            <p>
+                This auction was cancelled.
+            </p>
+
+        {% else %}
+
+            <p>
+                Auction is not currently active.
+            </p>
+
+        {% endif %}
+
+    {% else %}
+
+        <p>
+            Seller has not created an auction for this product yet.
+        </p>
+
+    {% endif %}
+
+{% endif %}
+
+
+<br><br>
+
+<a href="{% url 'marketplace' %}">
+    Back to Marketplace
+</a>
+
+</body>
+</html>

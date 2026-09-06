@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Seller Orders | RootLine</title>
+</head>
+<body>
+
+<h2>Incoming Orders</h2>
+
+{% if orders %}
+
+    {% for order in orders %}
+
+        <hr>
+
+        <h3>Order #{{ order.id }}</h3>
+
+        <!-- BUYER INFORMATION -->
+
+        <p>Buyer: {{ order.buyer.username }}</p>
+        <p>Recipient: {{ order.recipient_name }}</p>
+        <p>Email: {{ order.email }}</p>
+        <p>Phone: {{ order.phone_number }}</p>
+        <p>Address: {{ order.delivery_address }}</p>
+
+
+        <!-- PAYMENT INFORMATION -->
+
+        <p>
+            Payment Method:
+            {{ order.get_payment_method_display }}
+        </p>
+
+        {% if order.payment %}
+
+            <p>
+                Payment Status:
+                <strong>
+                    {{ order.payment.get_payment_status_display }}
+                </strong>
+            </p>
+
+            <p>
+                Escrow Status:
+                {{ order.payment.get_escrow_status_display }}
+            </p>
+
+            {% if order.payment.payment_status == 'verification_pending' %}
+
+                <p>
+                    Payment submitted by buyer.
+                    Waiting for admin verification.
+                </p>
+
+            {% elif order.payment.payment_status == 'paid' %}
+
+                <p>
+                    Payment verified successfully.
+                </p>
+
+            {% elif order.payment.payment_status == 'failed' %}
+
+                <p>
+                    Payment verification failed.
+                    Waiting for buyer to submit payment again.
+                </p>
+
+            {% elif order.payment.payment_status == 'refunded' %}
+
+                <p>
+                    Payment has been refunded to buyer.
+                </p>
+
+            {% endif %}
+
+        {% else %}
+
+            <p>Payment record not available.</p>
+
+        {% endif %}
+
+
+        <!-- ORDER STATUS -->
+
+        <p>
+            Order Status:
+            <strong>
+                {{ order.get_status_display }}
+            </strong>
+        </p>
+
+
+        <!-- SELLER ACTIONS -->
+
+        {% if order.status == 'pending' %}
+
+            <form method="POST"
+                  action="{% url 'update_order_status' order.id %}">
+
+                {% csrf_token %}
+
+                <button
+                    type="submit"
+                    name="action"
+                    value="confirm">
+                    Confirm Order
+                </button>
+
+                <button
+                    type="submit"
+                    name="action"
+                    value="cancel">
+                    Cancel Order
+                </button>
+
+            </form>
+
+
+        {% elif order.status == 'confirmed' %}
+
+            {% if order.payment.payment_status == 'paid' and order.payment.escrow_status == 'held' %}
+
+                <p>
+                    Payment verified and held in escrow.
+                    You can now ship the order.
+                </p>
+
+                <form method="POST"
+                      action="{% url 'update_order_status' order.id %}">
+
+                    {% csrf_token %}
+
+                    <button
+                        type="submit"
+                        name="action"
+                        value="ship">
+                        Mark as Shipped
+                    </button>
+
+                </form>
+
+            {% else %}
+
+                <p>
+                    Waiting for payment verification before shipment.
+                </p>
+
+            {% endif %}
+
+
+        {% elif order.status == 'shipped' %}
+
+            <p>
+                Order shipped.
+                Waiting for buyer to confirm delivery.
+            </p>
+
+
+        {% elif order.status == 'delivered' %}
+
+            <p>
+                Order completed.
+            </p>
+
+            {% if order.payment %}
+
+                <p>
+                    Commission:
+                    ৳{{ order.payment.commission_amount }}
+                </p>
+
+                <p>
+                    Seller Amount:
+                    ৳{{ order.payment.seller_amount }}
+                </p>
+
+                <p>
+                    Escrow:
+                    {{ order.payment.get_escrow_status_display }}
+                </p>
+
+            {% endif %}
+
+
+        {% elif order.status == 'cancelled' %}
+
+            <p>
+                Order cancelled.
+            </p>
+
+        {% endif %}
+
+
+        <!-- ORDER ITEMS -->
+
+        <h4>Items</h4>
+
+        {% for item in order.items.all %}
+
+            <p>
+                {{ item.product_name }}
+                -
+                {{ item.quantity }}
+                {{ item.unit }}
+                -
+                ৳{{ item.price }}
+            </p>
+
+        {% endfor %}
+
+
+        <p>
+            <strong>
+                Total: ৳{{ order.total_amount }}
+            </strong>
+        </p>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No orders received yet.</p>
+
+{% endif %}
+
+
+<br>
+
+<a href="{% url 'seller_dashboard' %}">
+    Back to Seller Dashboard
+</a>
+
+</body>
+</html>

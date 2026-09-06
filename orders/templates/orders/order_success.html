@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Order Successful | RootLine</title>
+</head>
+<body>
+
+<h2>Order Placed Successfully</h2>
+
+{% for order in orders %}
+
+    <hr>
+
+    <h3>Order #{{ order.id }}</h3>
+
+    <p>Seller: {{ order.seller.username }}</p>
+
+    <p>
+        Payment Method:
+        {{ order.get_payment_method_display }}
+    </p>
+
+    <p>Status: {{ order.get_status_display }}</p>
+
+    <p>Total: ৳{{ order.total_amount }}</p>
+
+    <h4>Items</h4>
+
+    {% for item in order.items.all %}
+
+        <p>
+            {{ item.product_name }}
+            -
+            {{ item.quantity }}
+            {{ item.unit }}
+            -
+            ৳{{ item.price }}
+        </p>
+
+    {% endfor %}
+
+{% endfor %}
+
+<br>
+
+<a href="{% url 'marketplace' %}">
+    Continue Shopping
+</a>
+
+</body>
+</html>

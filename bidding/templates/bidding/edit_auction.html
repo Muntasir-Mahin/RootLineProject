@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Edit Auction | RootLine</title>
+</head>
+<body>
+
+<h2>Edit Auction</h2>
+
+<h3>{{ auction.product.name }}</h3>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Save Auction Changes
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'my_products' %}">
+    Back to My Products
+</a>
+
+</body>
+</html>

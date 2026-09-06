@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My Orders | RootLine</title>
+</head>
+<body>
+
+<h2>My Orders</h2>
+
+{% if orders %}
+
+    {% for order in orders %}
+
+        <hr>
+
+        <h3>Order #{{ order.id }}</h3>
+
+        <p>
+            Seller:
+            {{ order.seller.username }}
+        </p>
+
+        <p>
+            Order Status:
+            <strong>{{ order.get_status_display }}</strong>
+        </p>
+
+        <p>
+            Payment Method:
+            {{ order.get_payment_method_display }}
+        </p>
+
+        <!-- PAYMENT SECTION -->
+
+        {% if order.payment %}
+
+            <p>
+                Payment Status:
+                <strong>
+                    {{ order.payment.get_payment_status_display }}
+                </strong>
+            </p>
+
+            {% if order.payment.payment_status == 'pending' or order.payment.payment_status == 'failed' %}
+
+                {% if order.status != 'cancelled' %}
+                    <a href="{% url 'make_payment' order.id %}">
+                        Pay Now
+                    </a>
+                {% endif %}
+
+            {% elif order.payment.payment_status == 'verification_pending' %}
+
+                <p>
+                    Transaction ID:
+                    {{ order.payment.transaction_id }}
+                </p>
+
+                <p>
+                    Your payment is waiting for verification.
+                </p>
+
+            {% elif order.payment.payment_status == 'paid' %}
+
+                <p>
+                    Escrow Status:
+                    {{ order.payment.get_escrow_status_display }}
+                </p>
+
+                <p>
+                    Payment verified successfully.
+                </p>
+
+            {% elif order.payment.payment_status == 'refunded' %}
+
+                <p>
+                    Payment has been refunded.
+                </p>
+
+            {% endif %}
+
+        {% endif %}
+
+
+        <!-- DELIVERY SECTION -->
+
+        {% if order.status == 'shipped' %}
+
+            <form method="POST"
+                  action="{% url 'confirm_delivery' order.id %}">
+                {% csrf_token %}
+
+                <button type="submit">
+                    Confirm Delivery
+                </button>
+            </form>
+
+        {% elif order.status == 'delivered' %}
+
+            <p>
+                Delivery Confirmed
+            </p>
+
+        {% elif order.status == 'cancelled' %}
+
+            <p>
+                This order was cancelled.
+            </p>
+
+        {% endif %}
+
+
+        <!-- DELIVERY INFORMATION -->
+
+        <p>
+            Recipient:
+            {{ order.recipient_name }}
+        </p>
+
+        <p>
+            Phone:
+            {{ order.phone_number }}
+        </p>
+
+        <p>
+            Delivery Address:
+            {{ order.delivery_address }}
+        </p>
+
+
+        <!-- ORDER ITEMS -->
+
+        <h4>Items</h4>
+
+        {% for item in order.items.all %}
+
+            <p>
+                {{ item.product_name }}
+                -
+                {{ item.quantity }}
+                {{ item.unit }}
+                -
+                ৳{{ item.price }}
+            </p>
+
+        {% endfor %}
+
+
+        <p>
+            <strong>
+                Total: ৳{{ order.total_amount }}
+            </strong>
+        </p>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>
+        You have no orders yet.
+    </p>
+
+{% endif %}
+
+
+<br>
+
+<a href="{% url 'marketplace' %}">
+    Continue Shopping
+</a>
+
+</body>
+</html>

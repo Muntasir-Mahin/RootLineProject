@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Auctions | RootLine</title>
+</head>
+<body>
+
+<h2>Active Auctions</h2>
+
+{% if auctions %}
+
+    {% for auction in auctions %}
+
+        <hr>
+
+        <h3>{{ auction.product.name }}</h3>
+
+        <p>
+            Seller:
+            {{ auction.product.seller.username }}
+        </p>
+
+        <p>
+            Starting Price:
+            ৳{{ auction.starting_price }}
+        </p>
+
+        <p>
+            Minimum Increment:
+            ৳{{ auction.minimum_increment }}
+        </p>
+
+        <p>
+            Ends:
+            {{ auction.end_time }}
+        </p>
+
+        <a href="{% url 'auction_detail' auction.id %}">
+            View Auction
+        </a>
+
+    {% endfor %}
+
+{% else %}
+
+    <p>No active auctions available.</p>
+
+{% endif %}
+
+<br><br>
+
+<a href="{% url 'marketplace' %}">
+    Back to Marketplace
+</a>
+
+</body>
+</html>

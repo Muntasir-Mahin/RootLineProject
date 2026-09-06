@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ auction.product.name }} Auction | RootLine</title>
+</head>
+<body>
+
+<h2>{{ auction.product.name }}</h2>
+
+<p>
+    Seller:
+    {{ auction.product.seller.username }}
+</p>
+
+<p>
+    Starting Price:
+    ৳{{ auction.starting_price }}
+</p>
+
+<p>
+    Minimum Increment:
+    ৳{{ auction.minimum_increment }}
+</p>
+
+<p>
+    Auction Status:
+    <strong>{{ auction.get_status_display }}</strong>
+</p>
+
+<p>
+    Start Time:
+    {{ auction.start_time }}
+</p>
+
+<p>
+    End Time:
+    {{ auction.end_time }}
+</p>
+
+
+<hr>
+
+
+<!-- CURRENT BID -->
+
+<h3>Current Bid</h3>
+
+{% if highest_bid %}
+
+    <p>
+        Highest Bid:
+        <strong>
+            ৳{{ highest_bid.amount }}
+        </strong>
+    </p>
+
+    <p>
+        Highest Bidder:
+        <strong>
+            {{ highest_bid.bidder.username }}
+        </strong>
+    </p>
+
+{% else %}
+
+    <p>No bids yet.</p>
+
+{% endif %}
+
+
+<!-- ACTIVE AUCTION -->
+
+{% if auction.status == 'active' %}
+
+    <p>
+        Minimum Next Bid:
+        <strong>
+            ৳{{ minimum_bid }}
+        </strong>
+    </p>
+
+    {% if user.is_authenticated %}
+
+        {% if user != auction.product.seller %}
+
+            <h3>Place Bid</h3>
+
+            <form
+                method="POST"
+                action="{% url 'place_bid' auction.id %}"
+            >
+
+                {% csrf_token %}
+
+                <label>
+                    Bid Amount:
+                </label>
+
+                <input
+                    type="number"
+                    name="amount"
+                    step="0.01"
+                    min="{{ minimum_bid }}"
+                    required
+                >
+
+                <button type="submit">
+                    Place Bid
+                </button>
+
+            </form>
+
+        {% else %}
+
+            <p>
+                You cannot bid on your own product.
+            </p>
+
+        {% endif %}
+
+    {% else %}
+
+        <p>
+            Please login to place a bid.
+        </p>
+
+    {% endif %}
+
+{% endif %}
+
+
+<!-- UPCOMING AUCTION -->
+
+{% if auction.status == 'upcoming' %}
+
+    <p>
+        Auction has not started yet.
+    </p>
+
+{% endif %}
+
+
+<!-- AUCTION ENDED -->
+
+{% if auction.status == 'ended' %}
+
+    <hr>
+
+    <h3>Auction Result</h3>
+
+    {% if auction.winner %}
+
+        <p>
+            Winner:
+            <strong>
+                {{ auction.winner.username }}
+            </strong>
+        </p>
+
+        <p>
+            Winning Bid:
+            <strong>
+                ৳{{ auction.winning_bid }}
+            </strong>
+        </p>
+
+
+        <!-- WINNER OPTIONS -->
+
+        {% if user == auction.winner %}
+
+            <hr>
+
+            <h3>Congratulations!</h3>
+
+            <p>
+                You won this auction.
+            </p>
+
+            {% if auction.order %}
+
+                <p>
+                    Your auction order has already been created.
+                </p>
+
+                <a href="{% url 'my_orders' %}">
+                    Go to My Orders
+                </a>
+
+            {% else %}
+
+                <p>
+                    Please complete your purchase to continue
+                    with payment.
+                </p>
+
+                <a href="{% url 'auction_winner_checkout' auction.id %}">
+                    Complete Purchase
+                </a>
+
+            {% endif %}
+
+        {% endif %}
+
+
+        <!-- SELLER VIEW -->
+
+        {% if user == auction.product.seller %}
+
+            <p>
+                Auction Winner:
+                <strong>
+                    {{ auction.winner.username }}
+                </strong>
+            </p>
+
+            <p>
+                Final Selling Price:
+                <strong>
+                    ৳{{ auction.winning_bid }}
+                </strong>
+            </p>
+
+            {% if auction.order %}
+
+                <p>
+                    Winner has completed auction checkout.
+                </p>
+
+                <a href="{% url 'seller_orders' %}">
+                    View Incoming Orders
+                </a>
+
+            {% else %}
+
+                <p>
+                    Waiting for winner to complete purchase.
+                </p>
+
+            {% endif %}
+
+        {% endif %}
+
+    {% else %}
+
+        <p>
+            Auction ended without any bids.
+        </p>
+
+    {% endif %}
+
+{% endif %}
+
+
+<!-- CANCELLED -->
+
+{% if auction.status == 'cancelled' %}
+
+    <hr>
+
+    <p>
+        This auction has been cancelled.
+    </p>
+
+{% endif %}
+
+
+<hr>
+
+
+<!-- BID HISTORY -->
+
+<h3>Bid History</h3>
+
+{% for bid in auction.bids.all %}
+
+    <p>
+        Bidder:
+        <strong>
+            {{ bid.bidder.username }}
+        </strong>
+
+        |
+
+        Amount:
+        <strong>
+            ৳{{ bid.amount }}
+        </strong>
+
+        |
+
+        Time:
+        {{ bid.created_at }}
+    </p>
+
+{% empty %}
+
+    <p>
+        No bids yet.
+    </p>
+
+{% endfor %}
+
+
+<br>
+
+<a href="{% url 'auction_list' %}">
+    Back to Auctions
+</a>
+
+</body>
+</html>
