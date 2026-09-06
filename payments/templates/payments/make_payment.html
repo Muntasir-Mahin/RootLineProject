@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Payment | RootLine</title>
+</head>
+<body>
+
+<h2>Make Payment</h2>
+
+<p>Order: #{{ order.id }}</p>
+
+<p>
+    Payment Method:
+    {{ order.get_payment_method_display }}
+</p>
+
+<p>
+    Amount:
+    ৳{{ payment.amount }}
+</p>
+
+<p>
+    Complete the payment using the selected payment method,
+    then enter your transaction ID below.
+</p>
+
+<p>
+    Your payment will be verified before the seller can ship the order.
+</p>
+
+<form method="POST">
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Submit Payment
+    </button>
+</form>
+
+<br>
+
+<a href="{% url 'my_orders' %}">
+    Back to My Orders
+</a>
+
+</body>
+</html>

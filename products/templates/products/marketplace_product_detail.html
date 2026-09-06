@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{{ product.name }} | RootLine</title>
+</head>
+<body>
+
+<h2>{{ product.name }}</h2>
+
+{% if product.image %}
+    <img src="{{ product.image.url }}" width="300">
+{% endif %}
+
+<p>Seller: {{ product.seller.username }}</p>
+
+<p>Category: {{ product.category }}</p>
+
+<p>Description:</p>
+<p>{{ product.description }}</p>
+
+<p>
+    Price:
+    {% if product.price %}
+        ৳{{ product.price }}
+    {% else %}
+        No Fixed Price
+    {% endif %}
+</p>
+
+<p>
+    Stock:
+    {{ product.stock_quantity }}
+    {{ product.get_unit_display }}
+</p>
+
+<p>
+    Selling Type:
+    {{ product.get_selling_type_display }}
+</p>
+
+<p>Organic Verification: Verified</p>
+
+<br>
+ {% if product.selling_type == 'fixed' or product.selling_type == 'both' %}
+
+    <h3>Buy This Product</h3>
+
+    <form method="POST" action="{% url 'add_to_cart' product.id %}">
+        {% csrf_token %}
+
+        <label>Quantity:</label>
+
+        <input
+            type="number"
+            name="quantity"
+            value="1"
+            min="0.01"
+            step="0.01"
+            max="{{ product.stock_quantity }}"
+            required
+        >
+
+        {{ product.get_unit_display }}
+
+        <br><br>
+
+        <button type="submit">Add to Cart</button>
+    </form>
+
+{% else %}
+
+    <p>This product is available through bidding only.</p>
+
+{% endif %}
+<a href="{% url 'marketplace' %}">
+    Back to Marketplace
+</a>
+
+</body>
+</html>
