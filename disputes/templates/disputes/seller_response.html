@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Respond to Dispute | RootLine</title>
+</head>
+
+<body>
+
+<h2>Respond to Dispute</h2>
+
+<p>
+    Dispute:
+    #{{ dispute.id }}
+</p>
+
+<p>
+    Order:
+    #{{ dispute.order.id }}
+</p>
+
+<p>
+    Buyer:
+    {{ dispute.order.buyer.username }}
+</p>
+
+<p>
+    Reason:
+    {{ dispute.get_reason_display }}
+</p>
+
+<p>
+    Buyer Complaint:
+    {{ dispute.description }}
+</p>
+
+<hr>
+
+<h3>Your Response</h3>
+
+<form method="POST">
+
+    {% csrf_token %}
+
+    {{ form.as_p }}
+
+    <button type="submit">
+        Submit Response
+    </button>
+
+</form>
+
+<br>
+
+<a href="{% url 'seller_orders' %}">
+    Back to Incoming Orders
+</a>
+
+</body>
+</html>
