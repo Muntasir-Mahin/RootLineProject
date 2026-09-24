@@ -1,36 +1,136 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Create Auction | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>Create Auction</h2>
 
-<h3>{{ product.name }}</h3>
+{% block content %}
 
-<p>
-    Selling Type:
-    {{ product.get_selling_type_display }}
+
+
+<div class="min-h-[70vh] flex items-center justify-center">
+
+
+
+<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
+
+
+
+
+
+<h2 class="text-4xl font-bold text-gray-800 text-center mb-6">
+
+Create Auction
+
+</h2>
+
+
+
+
+
+
+
+<div class="bg-gray-50 rounded-lg p-5 mb-6">
+
+
+
+<h3 class="text-2xl font-bold text-gray-800">
+
+{{ product.name }}
+
+</h3>
+
+
+
+<p class="mt-2 text-gray-600">
+
+Selling Type:
+
+<span class="font-semibold">
+
+{{ product.get_selling_type_display }}
+
+</span>
+
 </p>
 
-<form method="POST">
 
-    {% csrf_token %}
 
-    {{ form.as_p }}
+</div>
 
-    <button type="submit">
-        Create Auction
-    </button>
+
+
+
+
+
+
+
+<form method="POST" class="space-y-5">
+
+
+{% csrf_token %}
+
+
+
+
+<div class="space-y-4">
+
+
+{{ form.as_p }}
+
+
+</div>
+
+
+
+
+
+
+
+<button
+
+type="submit"
+
+class="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
+
+>
+
+Create Auction
+
+</button>
+
+
+
 
 </form>
 
-<br>
 
-<a href="{% url 'my_products' %}">
-    Back to My Products
+
+
+
+
+
+<a
+
+href="{% url 'my_products' %}"
+
+class="block text-center mt-6 text-green-700 font-semibold"
+
+>
+
+← Back to My Products
+
 </a>
 
-</body>
-</html>
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+{% endblock %}

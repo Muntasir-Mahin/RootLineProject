@@ -1,490 +1,706 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Orders | RootLine</title>
-</head>
+{% extends 'base.html' %}
 
-<body>
 
-<h2>My Orders</h2>
+{% block content %}
+
+
+<h2 class="text-4xl font-bold text-gray-800 mb-8">
+    My Orders
+</h2>
+
 
 
 {% if orders %}
 
-    {% for order in orders %}
 
-        <hr>
 
-        <h3>Order #{{ order.id }}</h3>
+{% for order in orders %}
 
 
-        <!-- ============================= -->
-        <!-- BASIC ORDER INFORMATION -->
-        <!-- ============================= -->
 
-        <p>
-            Seller:
-            {{ order.seller.username }}
-        </p>
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
 
-        <p>
-            Order Status:
-            <strong>
-                {{ order.get_status_display }}
-            </strong>
-        </p>
 
-        <p>
-            Payment Method:
-            {{ order.get_payment_method_display }}
-        </p>
 
+<h3 class="text-2xl font-bold text-gray-800 mb-5">
 
-        <!-- ============================= -->
-        <!-- PAYMENT INFORMATION -->
-        <!-- ============================= -->
+Order #{{ order.id }}
 
-        {% if order.payment %}
+</h3>
 
-            <h4>Payment Information</h4>
 
-            <p>
-                Payment Status:
-                <strong>
-                    {{ order.payment.get_payment_status_display }}
-                </strong>
-            </p>
 
 
-            {% if order.payment.payment_status == 'pending' or order.payment.payment_status == 'failed' %}
 
-                {% if order.status != 'cancelled' %}
+<!-- BASIC INFO -->
 
-                    <a href="{% url 'make_payment' order.id %}">
-                        Pay Now
-                    </a>
+<div class="space-y-2">
 
-                {% endif %}
 
+<p>
+Seller:
 
-            {% elif order.payment.payment_status == 'verification_pending' %}
+<span class="font-semibold">
 
-                <p>
-                    Transaction ID:
-                    {{ order.payment.transaction_id }}
-                </p>
+{{ order.seller.username }}
 
-                <p>
-                    Your payment is waiting for admin verification.
-                </p>
+</span>
 
+</p>
 
-            {% elif order.payment.payment_status == 'paid' %}
 
-                <p>
-                    Escrow Status:
-                    <strong>
-                        {{ order.payment.get_escrow_status_display }}
-                    </strong>
-                </p>
 
-                <p>
-                    Payment verified successfully.
-                </p>
+<p>
+Order Status:
 
+<span class="font-bold text-green-700">
 
-            {% elif order.payment.payment_status == 'refunded' %}
+{{ order.get_status_display }}
 
-                <p>
-                    Payment has been refunded.
-                </p>
+</span>
 
-                <p>
-                    Escrow Status:
-                    <strong>
-                        {{ order.payment.get_escrow_status_display }}
-                    </strong>
-                </p>
+</p>
 
-            {% endif %}
 
-        {% else %}
 
-            <p>
-                Payment record not available.
-            </p>
+<p>
 
-        {% endif %}
+Payment Method:
 
+{{ order.get_payment_method_display }}
 
-        <!-- ============================= -->
-        <!-- DELIVERY / DISPUTE SECTION -->
-        <!-- ============================= -->
+</p>
 
-        <h4>Delivery Status</h4>
 
+</div>
 
-        {% if order.status == 'shipped' %}
 
 
-            <!-- DISPUTE EXISTS -->
 
-            {% if order.dispute %}
 
-                <hr>
 
-                <h4>Dispute Information</h4>
 
+<!-- PAYMENT -->
 
-                <!-- 1. DISPUTE STATUS -->
 
-                <p>
-                    Dispute Status:
-                    <strong>
-                        {{ order.dispute.get_status_display }}
-                    </strong>
-                </p>
+{% if order.payment %}
 
 
-                <!-- 2. DISPUTE REASON -->
+<div class="mt-6 bg-gray-50 rounded-lg p-5">
 
-                <p>
-                    Dispute Reason:
-                    {{ order.dispute.get_reason_display }}
-                </p>
 
+<h4 class="text-xl font-bold mb-3">
 
-                <!-- 3. BUYER COMPLAINT -->
+Payment Information
 
-                <p>
-                    Buyer Complaint:
-                    {{ order.dispute.description }}
-                </p>
+</h4>
 
 
-                <!-- 4. SELLER RESPONSE -->
 
-                {% if order.dispute.seller_response %}
+<p>
 
-                    <p>
-                        Seller Response:
-                        {{ order.dispute.seller_response }}
-                    </p>
+Payment Status:
 
-                {% else %}
+<strong>
 
-                    <p>
-                        Seller Response:
-                        Waiting for seller response.
-                    </p>
+{{ order.payment.get_payment_status_display }}
 
-                {% endif %}
+</strong>
 
+</p>
 
-                <!-- 5. ADMIN DECISION / NOTE -->
 
-                {% if order.dispute.admin_note %}
 
-                    <p>
-                        Admin Decision / Note:
-                        {{ order.dispute.admin_note }}
-                    </p>
+{% if order.payment.payment_status == 'pending' or order.payment.payment_status == 'failed' %}
 
-                {% else %}
 
-                    <p>
-                        Admin Decision / Note:
-                        Waiting for admin review.
-                    </p>
+{% if order.status != 'cancelled' %}
 
-                {% endif %}
 
+<a href="{% url 'make_payment' order.id %}"
 
-                <!-- 6. REFUND INFORMATION -->
+class="inline-block mt-4 bg-green-700 text-white px-5 py-2 rounded-lg">
 
-                {% if order.dispute.status == 'refund_approved' %}
+Pay Now
 
-                    <h4>Refund Information</h4>
+</a>
 
-                    <p>
-                        Refund Status:
-                        <strong>
-                            {{ order.payment.get_payment_status_display }}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Refund Escrow Status:
-                        <strong>
-                            {{ order.payment.get_escrow_status_display }}
-                        </strong>
-                    </p>
-
-                    <p>
-                        Refund Amount:
-                        <strong>
-                            ৳{{ order.payment.amount }}
-                        </strong>
-                    </p>
-
-                {% endif %}
-
-
-                <!-- 7. RESOLVED BY -->
-
-                {% if order.dispute.resolved_by %}
-
-                    <p>
-                        Resolved By:
-                        {{ order.dispute.resolved_by.username }}
-                    </p>
-
-                {% endif %}
-
-
-                <!-- 8. RESOLVED AT -->
-
-                {% if order.dispute.resolved_at %}
-
-                    <p>
-                        Resolved At:
-                        {{ order.dispute.resolved_at }}
-                    </p>
-
-                {% endif %}
-
-
-                <!-- DISPUTE CURRENT STATE MESSAGE -->
-
-                {% if order.dispute.status == 'open' %}
-
-                    <p>
-                        Your dispute has been submitted.
-                        Waiting for seller response.
-                    </p>
-
-                    <p>
-                        Delivery confirmation is unavailable
-                        while this dispute is active.
-                    </p>
-
-
-                {% elif order.dispute.status == 'seller_responded' %}
-
-                    <p>
-                        Seller has responded to your complaint.
-                        Waiting for admin review.
-                    </p>
-
-                    <p>
-                        Delivery confirmation is unavailable
-                        while this dispute is active.
-                    </p>
-
-
-                {% elif order.dispute.status == 'under_review' %}
-
-                    <p>
-                        Your dispute is currently under admin review.
-                    </p>
-
-                    <p>
-                        Delivery confirmation is unavailable
-                        while this dispute is active.
-                    </p>
-
-
-                {% elif order.dispute.status == 'refund_approved' %}
-
-                    <p>
-                        <strong>
-                            This dispute has been resolved with a refund.
-                        </strong>
-                    </p>
-
-
-                {% elif order.dispute.status == 'seller_favored' %}
-
-                    <p>
-                        <strong>
-                            This dispute was resolved in favor of the seller.
-                        </strong>
-                    </p>
-
-
-                {% elif order.dispute.status == 'rejected' %}
-
-                    <p>
-                        <strong>
-                            Your dispute was rejected by admin.
-                        </strong>
-                    </p>
-
-                {% endif %}
-
-
-            <!-- NO DISPUTE -->
-
-            {% else %}
-
-                <p>
-                    Order has been shipped.
-                </p>
-
-                <form
-                    method="POST"
-                    action="{% url 'confirm_delivery' order.id %}"
-                >
-
-                    {% csrf_token %}
-
-                    <button type="submit">
-                        Confirm Delivery
-                    </button>
-
-                </form>
-
-                <br>
-
-                <a href="{% url 'raise_dispute' order.id %}">
-                    Raise Dispute
-                </a>
-
-            {% endif %}
-
-
-        <!-- DELIVERED -->
-
-        {% elif order.status == 'delivered' %}
-
-            <p>
-                <strong>
-                    Delivery Confirmed
-                </strong>
-            </p>
-
-            {% if order.payment %}
-
-                <p>
-                    Escrow Status:
-                    {{ order.payment.get_escrow_status_display }}
-                </p>
-
-            {% endif %}
-
-
-        <!-- CANCELLED -->
-
-        {% elif order.status == 'cancelled' %}
-
-            <p>
-                This order was cancelled.
-            </p>
-
-
-        <!-- PENDING -->
-
-        {% elif order.status == 'pending' %}
-
-            <p>
-                Waiting for seller confirmation.
-            </p>
-
-
-        <!-- CONFIRMED -->
-
-        {% elif order.status == 'confirmed' %}
-
-            <p>
-                Order confirmed.
-                Waiting for shipment.
-            </p>
-
-        {% endif %}
-
-
-        <!-- ============================= -->
-        <!-- DELIVERY INFORMATION -->
-        <!-- ============================= -->
-
-        <h4>Delivery Information</h4>
-
-        <p>
-            Recipient:
-            {{ order.recipient_name }}
-        </p>
-
-        <p>
-            Email:
-            {{ order.email }}
-        </p>
-
-        <p>
-            Phone:
-            {{ order.phone_number }}
-        </p>
-
-        <p>
-            Delivery Address:
-            {{ order.delivery_address }}
-        </p>
-
-
-        <!-- ============================= -->
-        <!-- ORDER ITEMS -->
-        <!-- ============================= -->
-
-        <h4>Items</h4>
-
-        {% for item in order.items.all %}
-
-            <p>
-                {{ item.product_name }}
-                -
-                {{ item.quantity }}
-                {{ item.unit }}
-                -
-                ৳{{ item.price }}
-            </p>
-
-        {% empty %}
-
-            <p>
-                No items found.
-            </p>
-
-        {% endfor %}
-
-
-        <!-- ============================= -->
-        <!-- TOTAL -->
-        <!-- ============================= -->
-
-        <p>
-            <strong>
-                Total:
-                ৳{{ order.total_amount }}
-            </strong>
-        </p>
-
-
-    {% endfor %}
-
-
-{% else %}
-
-    <p>
-        You have no orders yet.
-    </p>
 
 {% endif %}
 
 
-<br><br>
 
-<a href="{% url 'marketplace' %}">
-    Continue Shopping
+
+{% elif order.payment.payment_status == 'verification_pending' %}
+
+
+
+<p class="mt-3">
+
+Transaction ID:
+
+{{ order.payment.transaction_id }}
+
+</p>
+
+
+<p class="text-yellow-600 mt-2">
+
+Waiting for admin verification.
+
+</p>
+
+
+
+
+{% elif order.payment.payment_status == 'paid' %}
+
+
+
+<p class="mt-3">
+
+Escrow Status:
+
+<strong>
+
+{{ order.payment.get_escrow_status_display }}
+
+</strong>
+
+</p>
+
+
+
+<p class="text-green-700">
+
+Payment verified successfully.
+
+</p>
+
+
+
+
+{% elif order.payment.payment_status == 'refunded' %}
+
+
+<p class="text-red-600 mt-3">
+
+Payment refunded.
+
+</p>
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+<!-- DELIVERY / DISPUTE -->
+
+
+<div class="mt-6">
+
+
+<h4 class="text-xl font-bold mb-4">
+
+Delivery Status
+
+</h4>
+
+
+
+{% if order.status == 'shipped' %}
+
+
+
+{% if order.dispute %}
+
+
+
+<div class="border border-red-300 bg-red-50 rounded-lg p-5">
+
+
+<h4 class="font-bold text-red-700 text-xl">
+
+Dispute Information
+
+</h4>
+
+
+
+<p class="mt-3">
+
+Status:
+
+<strong>
+
+{{ order.dispute.get_status_display }}
+
+</strong>
+
+</p>
+
+
+
+<p>
+
+Reason:
+
+{{ order.dispute.get_reason_display }}
+
+</p>
+
+
+
+<p>
+
+Buyer Complaint:
+
+{{ order.dispute.description }}
+
+</p>
+
+
+
+<p>
+
+Seller Response:
+
+{% if order.dispute.seller_response %}
+
+{{ order.dispute.seller_response }}
+
+{% else %}
+
+Waiting for seller response.
+
+{% endif %}
+
+</p>
+
+
+
+
+<p>
+
+Admin Note:
+
+{% if order.dispute.admin_note %}
+
+{{ order.dispute.admin_note }}
+
+{% else %}
+
+Waiting for admin review.
+
+{% endif %}
+
+</p>
+
+
+
+
+
+{% if order.dispute.status == 'refund_approved' %}
+
+
+
+<p class="mt-3 text-green-700 font-bold">
+
+Refund Approved
+
+</p>
+
+
+
+<p>
+
+Refund Amount:
+
+৳{{ order.payment.amount }}
+
+</p>
+
+
+{% endif %}
+
+
+
+
+
+
+{% if order.dispute.resolved_by %}
+
+
+<p>
+
+Resolved By:
+
+{{ order.dispute.resolved_by.username }}
+
+</p>
+
+
+{% endif %}
+
+
+
+
+
+{% if order.dispute.resolved_at %}
+
+
+<p>
+
+Resolved At:
+
+{{ order.dispute.resolved_at }}
+
+</p>
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+
+
+{% else %}
+
+
+
+<p>
+
+Order shipped.
+
+</p>
+
+
+
+<form method="POST"
+action="{% url 'confirm_delivery' order.id %}">
+
+
+{% csrf_token %}
+
+
+<button
+
+class="mt-3 bg-green-700 text-white px-5 py-2 rounded-lg">
+
+Confirm Delivery
+
+</button>
+
+
+</form>
+
+
+
+
+<a
+
+href="{% url 'raise_dispute' order.id %}"
+
+class="inline-block mt-4 text-red-600 font-semibold">
+
+Raise Dispute
+
 </a>
 
-</body>
-</html>
+
+
+{% endif %}
+
+
+
+
+
+
+
+{% elif order.status == 'delivered' %}
+
+
+
+<p class="text-green-700 font-bold">
+
+Delivery Confirmed
+
+</p>
+
+
+
+
+
+<h4 class="text-xl font-bold mt-5">
+
+Review
+
+</h4>
+
+
+
+
+{% for item in order.items.all %}
+
+
+
+{% if not item.has_review %}
+
+
+
+<a
+
+href="{% url 'add_review' item.product_id order.id %}"
+
+class="block text-blue-600 mt-2">
+
+Write Review for {{ item.product_name }}
+
+</a>
+
+
+
+{% else %}
+
+
+<p>
+
+Review submitted for {{ item.product_name }}
+
+</p>
+
+
+{% endif %}
+
+
+
+
+{% endfor %}
+
+
+
+
+
+{% elif order.status == 'cancelled' %}
+
+
+<p class="text-red-600">
+
+This order was cancelled.
+
+</p>
+
+
+
+
+{% elif order.status == 'pending' %}
+
+
+
+<p>
+
+Waiting for seller confirmation.
+
+</p>
+
+
+
+
+{% elif order.status == 'confirmed' %}
+
+
+<p>
+
+Order confirmed. Waiting for shipment.
+
+</p>
+
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- DELIVERY INFO -->
+
+
+<div class="mt-6 bg-gray-50 rounded-lg p-5">
+
+
+<h4 class="text-xl font-bold mb-3">
+
+Delivery Information
+
+</h4>
+
+
+
+<p>
+Recipient:
+{{ order.recipient_name }}
+</p>
+
+
+<p>
+Email:
+{{ order.email }}
+</p>
+
+
+<p>
+Phone:
+{{ order.phone_number }}
+</p>
+
+
+<p>
+Address:
+{{ order.delivery_address }}
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+<!-- ITEMS -->
+
+
+<div class="mt-6">
+
+
+<h4 class="text-xl font-bold">
+
+Items
+
+</h4>
+
+
+
+{% for item in order.items.all %}
+
+
+<p class="mt-2">
+
+{{ item.product_name }}
+
+-
+
+{{ item.quantity }}
+
+{{ item.unit }}
+
+-
+
+৳{{ item.price }}
+
+</p>
+
+
+
+{% empty %}
+
+
+<p>
+
+No items found.
+
+</p>
+
+
+{% endfor %}
+
+
+
+<h3 class="text-2xl font-bold mt-5">
+
+Total:
+
+<span class="text-green-700">
+
+৳{{ order.total_amount }}
+
+</span>
+
+</h3>
+
+
+
+</div>
+
+
+
+
+</div>
+
+
+
+{% endfor %}
+
+
+
+{% else %}
+
+
+<div class="bg-white p-8 rounded-xl shadow">
+
+
+<p class="text-xl text-gray-600">
+
+You have no orders yet.
+
+</p>
+
+
+</div>
+
+
+{% endif %}
+
+
+
+
+
+<a href="{% url 'marketplace' %}"
+
+class="inline-block mt-5 text-green-700 font-semibold">
+
+← Continue Shopping
+
+</a>
+
+
+
+{% endblock %}

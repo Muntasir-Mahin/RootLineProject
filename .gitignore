@@ -3,3 +3,4 @@
 db.sqlite3
 __pycache__/
 *.pyc
+printf '\nnode_modules/\nmedia/\n.DS_Store\n' >> .gitignore

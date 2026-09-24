@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>My Wishlist</title>
+</head>
+
+<body>
+
+
+<h2>
+    My Wishlist ❤️
+</h2>
+
+
+{% if wishlist %}
+
+
+{% for item in wishlist %}
+
+
+<hr>
+
+
+<h3>
+    {{ item.product.name }}
+</h3>
+
+
+<p>
+    Seller:
+    {{ item.product.seller.username }}
+</p>
+
+
+<p>
+    Price:
+    ৳{{ item.product.price }}
+</p>
+
+
+<a href="{% url 'marketplace_product_detail' item.product.id %}">
+    View Product
+</a>
+
+
+<br>
+
+
+<a href="{% url 'remove_wishlist' item.product.id %}">
+    Remove
+</a>
+
+
+{% endfor %}
+
+
+
+{% else %}
+
+
+<p>
+    No wishlist items.
+</p>
+
+
+{% endif %}
+
+
+</body>
+
+</html>

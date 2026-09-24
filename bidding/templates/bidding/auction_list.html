@@ -1,57 +1,216 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Auctions | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>Active Auctions</h2>
+
+{% block content %}
+
+
+
+<div class="max-w-6xl mx-auto">
+
+
+
+
+
+<h2 class="text-4xl font-bold text-gray-800 mb-8">
+
+Active Auctions 🔨
+
+</h2>
+
+
+
+
+
 
 {% if auctions %}
 
-    {% for auction in auctions %}
 
-        <hr>
 
-        <h3>{{ auction.product.name }}</h3>
 
-        <p>
-            Seller:
-            {{ auction.product.seller.username }}
-        </p>
 
-        <p>
-            Starting Price:
-            ৳{{ auction.starting_price }}
-        </p>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
 
-        <p>
-            Minimum Increment:
-            ৳{{ auction.minimum_increment }}
-        </p>
 
-        <p>
-            Ends:
-            {{ auction.end_time }}
-        </p>
 
-        <a href="{% url 'auction_detail' auction.id %}">
-            View Auction
-        </a>
 
-    {% endfor %}
+
+{% for auction in auctions %}
+
+
+
+
+
+
+<div class="bg-white rounded-2xl shadow-lg p-6 hover:shadow-xl transition">
+
+
+
+
+
+<h3 class="text-2xl font-bold text-gray-800 mb-4">
+
+{{ auction.product.name }}
+
+</h3>
+
+
+
+
+
+
+<div class="space-y-3 text-gray-700">
+
+
+
+<p>
+
+Seller:
+
+<strong>
+
+{{ auction.product.seller.username }}
+
+</strong>
+
+</p>
+
+
+
+
+<p>
+
+Starting Price:
+
+<span class="font-bold text-green-700">
+
+৳{{ auction.starting_price }}
+
+</span>
+
+</p>
+
+
+
+
+
+<p>
+
+Minimum Increment:
+
+৳{{ auction.minimum_increment }}
+
+</p>
+
+
+
+
+
+<p>
+
+Ends:
+
+{{ auction.end_time }}
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<a
+
+href="{% url 'auction_detail' auction.id %}"
+
+class="block text-center mt-6 bg-green-700 text-white py-3 rounded-lg hover:bg-green-800 transition"
+
+>
+
+View Auction
+
+</a>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+{% endfor %}
+
+
+
+
+
+</div>
+
+
+
+
+
+
 
 {% else %}
 
-    <p>No active auctions available.</p>
+
+
+
+
+<div class="bg-white rounded-xl shadow p-8">
+
+
+<p class="text-gray-600 text-lg">
+
+No active auctions available.
+
+</p>
+
+
+</div>
+
+
+
+
 
 {% endif %}
 
-<br><br>
 
-<a href="{% url 'marketplace' %}">
-    Back to Marketplace
+
+
+
+
+
+
+<a
+
+href="{% url 'marketplace' %}"
+
+class="inline-block mt-10 bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900"
+
+>
+
+← Back to Marketplace
+
 </a>
 
-</body>
-</html>
+
+
+
+
+</div>
+
+
+
+
+{% endblock %}

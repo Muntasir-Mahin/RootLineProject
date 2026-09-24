@@ -1,51 +1,229 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Order Successful | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>Order Placed Successfully</h2>
+
+{% block content %}
+
+
+
+<div class="max-w-4xl mx-auto">
+
+
+<div class="bg-white shadow-xl rounded-2xl p-8 mb-8 text-center">
+
+
+<div class="text-green-600 text-6xl mb-4">
+
+✓
+
+</div>
+
+
+
+<h1 class="text-4xl font-bold text-gray-800">
+
+Order Placed Successfully
+
+</h1>
+
+
+
+<p class="text-gray-600 mt-3">
+
+Thank you for shopping with RootLine.
+
+</p>
+
+
+
+</div>
+
+
+
+
+
 
 {% for order in orders %}
 
-    <hr>
 
-    <h3>Order #{{ order.id }}</h3>
 
-    <p>Seller: {{ order.seller.username }}</p>
+<div class="bg-white rounded-xl shadow-lg p-6 mb-6">
 
-    <p>
-        Payment Method:
-        {{ order.get_payment_method_display }}
-    </p>
 
-    <p>Status: {{ order.get_status_display }}</p>
 
-    <p>Total: ৳{{ order.total_amount }}</p>
+<h2 class="text-2xl font-bold text-gray-800 mb-5">
 
-    <h4>Items</h4>
+Order #{{ order.id }}
 
-    {% for item in order.items.all %}
+</h2>
 
-        <p>
-            {{ item.product_name }}
-            -
-            {{ item.quantity }}
-            {{ item.unit }}
-            -
-            ৳{{ item.price }}
-        </p>
 
-    {% endfor %}
+
+
+
+<div class="space-y-2 text-gray-700">
+
+
+<p>
+
+Seller:
+
+<span class="font-semibold">
+
+{{ order.seller.username }}
+
+</span>
+
+</p>
+
+
+
+<p>
+
+Payment Method:
+
+{{ order.get_payment_method_display }}
+
+</p>
+
+
+
+<p>
+
+Status:
+
+<span class="font-semibold text-green-700">
+
+{{ order.get_status_display }}
+
+</span>
+
+</p>
+
+
+
+<p>
+
+Total:
+
+<span class="font-bold text-green-700">
+
+৳{{ order.total_amount }}
+
+</span>
+
+</p>
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="mt-6">
+
+
+<h3 class="text-xl font-bold mb-3">
+
+Items
+
+</h3>
+
+
+
+
+{% for item in order.items.all %}
+
+
+
+<div class="border rounded-lg p-4 mb-3 bg-gray-50">
+
+
+<p class="font-semibold text-gray-800">
+
+{{ item.product_name }}
+
+</p>
+
+
+
+<p class="text-gray-600">
+
+
+Quantity:
+
+{{ item.quantity }}
+
+{{ item.unit }}
+
+
+</p>
+
+
+
+<p class="text-green-700 font-bold">
+
+৳{{ item.price }}
+
+</p>
+
+
+
+</div>
+
+
+
+{% empty %}
+
+
+<p class="text-gray-500">
+
+No items found.
+
+</p>
+
+
 
 {% endfor %}
 
-<br>
 
-<a href="{% url 'marketplace' %}">
-    Continue Shopping
+
+</div>
+
+
+
+
+</div>
+
+
+
+
+{% endfor %}
+
+
+
+
+
+
+<a
+
+href="{% url 'marketplace' %}"
+
+class="inline-block bg-green-700 text-white px-8 py-3 rounded-lg hover:bg-green-800"
+
+>
+
+Continue Shopping
+
 </a>
 
-</body>
-</html>
+
+
+</div>
+
+
+
+{% endblock %}

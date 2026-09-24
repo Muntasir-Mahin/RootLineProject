@@ -1,43 +1,243 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Seller Dashboard | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>Seller Dashboard</h2>
 
-<p>Welcome, {{ user.get_full_name|default:user.username }}</p>
+{% block content %}
 
-<p>You are an approved RootLine seller.</p>
 
-<hr>
 
-<h3>Seller Options</h3>
+<div class="max-w-5xl mx-auto">
 
-<p>
-    <a href="{% url 'add_product' %}">
-        Add Product
-    </a>
+
+
+<!-- HEADER -->
+
+
+<div class="bg-green-700 text-white rounded-2xl p-8 shadow-lg mb-8">
+
+
+<h1 class="text-4xl font-bold">
+
+Seller Dashboard
+
+</h1>
+
+
+
+<p class="mt-3 text-lg">
+
+Welcome,
+
+<span class="font-semibold">
+
+{{ user.get_full_name|default:user.username }}
+
+</span>
+
 </p>
 
-<p>
-    <a href="{% url 'my_products' %}">
-        My Products
-    </a>
+
+
+<p class="mt-2">
+
+You are an approved RootLine seller.
+
 </p>
 
-<p>
-    <a href="{% url 'seller_orders' %}">
-        View Incoming Orders
-    </a>
+
+</div>
+
+
+
+
+
+
+<!-- OPTIONS -->
+
+
+<h2 class="text-3xl font-bold text-gray-800 mb-6">
+
+Seller Options
+
+</h2>
+
+
+
+
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+
+
+
+
+
+<!-- ADD PRODUCT -->
+
+
+<a
+
+href="{% url 'add_product' %}"
+
+class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition border-l-4 border-green-600"
+
+>
+
+
+<h3 class="text-2xl font-bold text-gray-800">
+
+➕ Add Product
+
+</h3>
+
+
+<p class="text-gray-600 mt-2">
+
+Create a new product listing.
+
 </p>
 
-<hr>
 
-<a href="{% url 'profile' %}">
-    Back to Profile
 </a>
 
-</body>
-</html>
+
+
+
+
+
+
+<!-- MY PRODUCTS -->
+
+
+<a
+
+href="{% url 'my_products' %}"
+
+class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition border-l-4 border-blue-600"
+
+>
+
+
+<h3 class="text-2xl font-bold text-gray-800">
+
+📦 My Products
+
+</h3>
+
+
+<p class="text-gray-600 mt-2">
+
+Manage your products.
+
+</p>
+
+
+</a>
+
+
+
+
+
+
+
+<!-- REVIEWS -->
+
+
+<a
+
+href="{% url 'seller_reviews' %}"
+
+class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition border-l-4 border-yellow-500"
+
+>
+
+
+<h3 class="text-2xl font-bold text-gray-800">
+
+⭐ My Reviews
+
+</h3>
+
+
+<p class="text-gray-600 mt-2">
+
+See customer feedback.
+
+</p>
+
+
+</a>
+
+
+
+
+
+
+
+<!-- ORDERS -->
+
+
+<a
+
+href="{% url 'seller_orders' %}"
+
+class="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition border-l-4 border-purple-600"
+
+>
+
+
+<h3 class="text-2xl font-bold text-gray-800">
+
+🛒 Incoming Orders
+
+</h3>
+
+
+<p class="text-gray-600 mt-2">
+
+Manage customer orders.
+
+</p>
+
+
+</a>
+
+
+
+
+
+</div>
+
+
+
+
+
+
+<!-- BACK -->
+
+
+<div class="mt-10">
+
+
+<a
+
+href="{% url 'profile' %}"
+
+class="inline-block bg-gray-800 text-white px-6 py-3 rounded-lg hover:bg-gray-900"
+
+>
+
+← Back to Profile
+
+</a>
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+{% endblock %}

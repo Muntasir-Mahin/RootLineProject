@@ -1,312 +1,769 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>{{ auction.product.name }} Auction | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>{{ auction.product.name }}</h2>
+
+{% block content %}
+
+
+
+<div class="max-w-5xl mx-auto">
+
+
+
+
+
+<!-- AUCTION HEADER -->
+
+
+<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+
+
+
+<h1 class="text-4xl font-bold text-gray-800 mb-5">
+
+{{ auction.product.name }}
+
+</h1>
+
+
+
 
 <p>
-    Seller:
-    {{ auction.product.seller.username }}
+
+Seller:
+
+<strong>
+
+{{ auction.product.seller.username }}
+
+</strong>
+
 </p>
+
+
+
+
+<div class="mt-5 space-y-2">
+
 
 <p>
-    Starting Price:
-    ৳{{ auction.starting_price }}
+
+Starting Price:
+
+<span class="font-bold text-green-700">
+
+৳{{ auction.starting_price }}
+
+</span>
+
 </p>
+
+
 
 <p>
-    Minimum Increment:
-    ৳{{ auction.minimum_increment }}
+
+Minimum Increment:
+
+৳{{ auction.minimum_increment }}
+
 </p>
+
+
+
 
 <p>
-    Auction Status:
-    <strong>{{ auction.get_status_display }}</strong>
+
+Status:
+
+<strong>
+
+{{ auction.get_status_display }}
+
+</strong>
+
 </p>
+
+
+
 
 <p>
-    Start Time:
-    {{ auction.start_time }}
+
+Start:
+
+{{ auction.start_time }}
+
 </p>
+
+
 
 <p>
-    End Time:
-    {{ auction.end_time }}
+
+End:
+
+{{ auction.end_time }}
+
 </p>
 
 
-<hr>
+
+</div>
+
+
+
+</div>
+
+
+
+
+
 
 
 <!-- CURRENT BID -->
 
-<h3>Current Bid</h3>
+
+<div class="bg-green-50 rounded-2xl p-6 shadow mb-8">
+
+
+<h3 class="text-2xl font-bold mb-4">
+
+Current Bid
+
+</h3>
+
+
+
 
 {% if highest_bid %}
 
-    <p>
-        Highest Bid:
-        <strong>
-            ৳{{ highest_bid.amount }}
-        </strong>
-    </p>
 
-    <p>
-        Highest Bidder:
-        <strong>
-            {{ highest_bid.bidder.username }}
-        </strong>
-    </p>
+
+<p>
+
+Highest Bid:
+
+<strong class="text-green-700 text-xl">
+
+৳{{ highest_bid.amount }}
+
+</strong>
+
+</p>
+
+
+
+
+<p>
+
+Highest Bidder:
+
+<strong>
+
+{{ highest_bid.bidder.username }}
+
+</strong>
+
+</p>
+
+
+
 
 {% else %}
 
-    <p>No bids yet.</p>
+
+
+<p class="text-gray-600">
+
+No bids yet.
+
+</p>
+
+
 
 {% endif %}
+
+
+
+</div>
+
+
+
+
+
 
 
 <!-- ACTIVE AUCTION -->
 
+
 {% if auction.status == 'active' %}
 
-    <p>
-        Minimum Next Bid:
-        <strong>
-            ৳{{ minimum_bid }}
-        </strong>
-    </p>
 
-    {% if user.is_authenticated %}
 
-        {% if user != auction.product.seller %}
+<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
 
-            <h3>Place Bid</h3>
 
-            <form
-                method="POST"
-                action="{% url 'place_bid' auction.id %}"
-            >
+<h3 class="text-2xl font-bold mb-4">
 
-                {% csrf_token %}
+Place Bid
 
-                <label>
-                    Bid Amount:
-                </label>
+</h3>
 
-                <input
-                    type="number"
-                    name="amount"
-                    step="0.01"
-                    min="{{ minimum_bid }}"
-                    required
-                >
 
-                <button type="submit">
-                    Place Bid
-                </button>
 
-            </form>
 
-        {% else %}
+<p>
 
-            <p>
-                You cannot bid on your own product.
-            </p>
+Minimum Next Bid:
 
-        {% endif %}
+<strong class="text-green-700">
 
-    {% else %}
+৳{{ minimum_bid }}
 
-        <p>
-            Please login to place a bid.
-        </p>
+</strong>
 
-    {% endif %}
+</p>
+
+
+
+
+
+{% if user.is_authenticated %}
+
+
+
+
+{% if user != auction.product.seller %}
+
+
+
+<form
+
+method="POST"
+
+action="{% url 'place_bid' auction.id %}"
+
+class="mt-5 flex flex-col md:flex-row gap-4"
+
+>
+
+
+{% csrf_token %}
+
+
+
+
+
+<input
+
+type="number"
+
+name="amount"
+
+step="0.01"
+
+min="{{ minimum_bid }}"
+
+required
+
+placeholder="Enter bid amount"
+
+class="border rounded-lg px-4 py-3"
+
+>
+
+
+
+
+<button
+
+type="submit"
+
+class="bg-green-700 text-white px-6 py-3 rounded-lg"
+
+>
+
+Place Bid
+
+</button>
+
+
+
+
+</form>
+
+
+
+
+{% else %}
+
+
+
+<p class="text-red-600 mt-4">
+
+You cannot bid on your own product.
+
+</p>
+
+
 
 {% endif %}
 
 
-<!-- UPCOMING AUCTION -->
+
+
+
+{% else %}
+
+
+
+<p class="text-yellow-600">
+
+Please login to place a bid.
+
+</p>
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+
+<!-- UPCOMING -->
+
 
 {% if auction.status == 'upcoming' %}
 
-    <p>
-        Auction has not started yet.
-    </p>
+
+
+<div class="bg-yellow-50 rounded-xl p-5 mb-8">
+
+
+<p class="font-semibold text-yellow-700">
+
+Auction has not started yet.
+
+</p>
+
+
+</div>
+
+
 
 {% endif %}
 
 
-<!-- AUCTION ENDED -->
+
+
+
+
+
+
+<!-- ENDED RESULT -->
+
 
 {% if auction.status == 'ended' %}
 
-    <hr>
-
-    <h3>Auction Result</h3>
-
-    {% if auction.winner %}
-
-        <p>
-            Winner:
-            <strong>
-                {{ auction.winner.username }}
-            </strong>
-        </p>
-
-        <p>
-            Winning Bid:
-            <strong>
-                ৳{{ auction.winning_bid }}
-            </strong>
-        </p>
 
 
-        <!-- WINNER OPTIONS -->
 
-        {% if user == auction.winner %}
-
-            <hr>
-
-            <h3>Congratulations!</h3>
-
-            <p>
-                You won this auction.
-            </p>
-
-            {% if auction.order %}
-
-                <p>
-                    Your auction order has already been created.
-                </p>
-
-                <a href="{% url 'my_orders' %}">
-                    Go to My Orders
-                </a>
-
-            {% else %}
-
-                <p>
-                    Please complete your purchase to continue
-                    with payment.
-                </p>
-
-                <a href="{% url 'auction_winner_checkout' auction.id %}">
-                    Complete Purchase
-                </a>
-
-            {% endif %}
-
-        {% endif %}
+<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
 
 
-        <!-- SELLER VIEW -->
 
-        {% if user == auction.product.seller %}
+<h3 class="text-3xl font-bold mb-5">
 
-            <p>
-                Auction Winner:
-                <strong>
-                    {{ auction.winner.username }}
-                </strong>
-            </p>
+Auction Result
 
-            <p>
-                Final Selling Price:
-                <strong>
-                    ৳{{ auction.winning_bid }}
-                </strong>
-            </p>
+</h3>
 
-            {% if auction.order %}
 
-                <p>
-                    Winner has completed auction checkout.
-                </p>
 
-                <a href="{% url 'seller_orders' %}">
-                    View Incoming Orders
-                </a>
 
-            {% else %}
 
-                <p>
-                    Waiting for winner to complete purchase.
-                </p>
+{% if auction.winner %}
 
-            {% endif %}
 
-        {% endif %}
 
-    {% else %}
 
-        <p>
-            Auction ended without any bids.
-        </p>
 
-    {% endif %}
+<p>
+
+Winner:
+
+<strong>
+
+{{ auction.winner.username }}
+
+</strong>
+
+</p>
+
+
+
+
+<p>
+
+Winning Bid:
+
+<strong class="text-green-700">
+
+৳{{ auction.winning_bid }}
+
+</strong>
+
+</p>
+
+
+
+
+
+
+
+
+{% if user == auction.winner %}
+
+
+
+<div class="mt-6 bg-green-50 p-5 rounded-lg">
+
+
+<h4 class="text-xl font-bold text-green-700">
+
+Congratulations!
+
+</h4>
+
+
+
+<p>
+
+You won this auction.
+
+</p>
+
+
+
+
+
+{% if auction.order %}
+
+
+
+<a
+
+href="{% url 'my_orders' %}"
+
+class="inline-block mt-4 bg-green-700 text-white px-5 py-2 rounded-lg"
+
+>
+
+Go to My Orders
+
+</a>
+
+
+
+
+{% else %}
+
+
+
+<a
+
+href="{% url 'auction_winner_checkout' auction.id %}"
+
+class="inline-block mt-4 bg-green-700 text-white px-5 py-2 rounded-lg"
+
+>
+
+Complete Purchase
+
+</a>
+
+
+
 
 {% endif %}
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+{% if user == auction.product.seller %}
+
+
+
+<div class="mt-6 bg-gray-50 p-5 rounded-lg">
+
+
+<h4 class="text-xl font-bold">
+
+Seller View
+
+</h4>
+
+
+
+
+<p>
+
+Auction Winner:
+
+{{ auction.winner.username }}
+
+</p>
+
+
+
+<p>
+
+Final Selling Price:
+
+<strong>
+
+৳{{ auction.winning_bid }}
+
+</strong>
+
+</p>
+
+
+
+
+{% if auction.order %}
+
+
+
+<a
+
+href="{% url 'seller_orders' %}"
+
+class="inline-block mt-4 text-green-700 font-semibold"
+
+>
+
+View Incoming Orders
+
+</a>
+
+
+
+
+{% else %}
+
+
+
+<p class="mt-3 text-gray-600">
+
+Waiting for winner purchase.
+
+</p>
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+{% endif %}
+
+
+
+
+
+
+{% else %}
+
+
+
+
+<p class="text-gray-600">
+
+Auction ended without any bids.
+
+</p>
+
+
+
+{% endif %}
+
+
+
+
+
+</div>
+
+
+
+
+{% endif %}
+
+
+
+
+
 
 
 <!-- CANCELLED -->
 
+
 {% if auction.status == 'cancelled' %}
 
-    <hr>
 
-    <p>
-        This auction has been cancelled.
-    </p>
+
+<div class="bg-red-50 text-red-700 p-5 rounded-xl mb-8">
+
+
+This auction has been cancelled.
+
+</div>
+
+
 
 {% endif %}
 
 
-<hr>
+
+
+
 
 
 <!-- BID HISTORY -->
 
-<h3>Bid History</h3>
+
+<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
+
+
+
+<h3 class="text-2xl font-bold mb-5">
+
+Bid History
+
+</h3>
+
+
+
 
 {% for bid in auction.bids.all %}
 
-    <p>
-        Bidder:
-        <strong>
-            {{ bid.bidder.username }}
-        </strong>
 
-        |
 
-        Amount:
-        <strong>
-            ৳{{ bid.amount }}
-        </strong>
+<div class="border rounded-lg p-4 mb-3 bg-gray-50">
 
-        |
 
-        Time:
-        {{ bid.created_at }}
-    </p>
+<p>
+
+Bidder:
+
+<strong>
+
+{{ bid.bidder.username }}
+
+</strong>
+
+</p>
+
+
+
+<p>
+
+Amount:
+
+<strong class="text-green-700">
+
+৳{{ bid.amount }}
+
+</strong>
+
+</p>
+
+
+
+<p class="text-gray-500">
+
+{{ bid.created_at }}
+
+</p>
+
+
+
+</div>
+
+
+
 
 {% empty %}
 
-    <p>
-        No bids yet.
-    </p>
+
+
+<p class="text-gray-500">
+
+No bids yet.
+
+</p>
+
+
 
 {% endfor %}
 
 
-<br>
 
-<a href="{% url 'auction_list' %}">
-    Back to Auctions
+
+</div>
+
+
+
+
+
+
+
+
+<a
+
+href="{% url 'auction_list' %}"
+
+class="inline-block bg-gray-800 text-white px-6 py-3 rounded-lg"
+
+>
+
+← Back to Auctions
+
 </a>
 
-</body>
-</html>
+
+
+
+
+
+</div>
+
+
+
+
+{% endblock %}
