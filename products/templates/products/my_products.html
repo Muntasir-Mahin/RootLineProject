@@ -1,136 +1,468 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>My Products | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>My Products</h2>
 
-<a href="{% url 'add_product' %}">
-    Add New Product
+{% block content %}
+
+
+
+<div class="max-w-6xl mx-auto">
+
+
+
+<div class="flex flex-col md:flex-row justify-between items-center mb-8">
+
+
+<h2 class="text-4xl font-bold text-gray-800">
+
+My Products
+
+</h2>
+
+
+
+<a
+
+href="{% url 'add_product' %}"
+
+class="mt-4 md:mt-0 bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800"
+
+>
+
++ Add New Product
+
 </a>
 
-<br><br>
+
+</div>
+
+
+
+
+
 
 {% if products %}
 
-    {% for product in products %}
-
-        <hr>
-
-        <h3>{{ product.name }}</h3>
-
-        <p>
-            Category:
-            {{ product.category }}
-        </p>
-
-        <p>
-            Price:
-            {% if product.price %}
-                ৳{{ product.price }}
-            {% else %}
-                No fixed price
-            {% endif %}
-        </p>
-
-        <p>
-            Stock:
-            {{ product.stock_quantity }}
-            {{ product.get_unit_display }}
-        </p>
-
-        <p>
-            Selling Type:
-            {{ product.get_selling_type_display }}
-        </p>
-
-        <p>
-            Verification:
-            {{ product.get_verification_status_display }}
-        </p>
-
-        <p>
-            Available:
-            {{ product.is_available }}
-        </p>
-
-        <a href="{% url 'product_detail' product.id %}">
-            View Details
-        </a>
-
-        <br><br>
-
-        <a href="{% url 'edit_product' product.id %}">
-            Edit Product
-        </a>
-
-        <br><br>
-
-        <a href="{% url 'delete_product' product.id %}">
-            Delete Product
-        </a>
 
 
-        <!-- AUCTION SECTION -->
 
-        {% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-            <br><br>
 
-            {% if product.auction %}
 
-                <p>
-                    Auction Status:
-                    <strong>
-                        {{ product.auction.get_status_display }}
-                    </strong>
-                </p>
 
-                <p>
-                    Start Time:
-                    {{ product.auction.start_time }}
-                </p>
 
-                <p>
-                    End Time:
-                    {{ product.auction.end_time }}
-                </p>
+{% for product in products %}
 
-                {% if product.auction.status == 'upcoming' %}
 
-                    <a href="{% url 'edit_auction' product.auction.id %}">
-                        Edit Auction
-                    </a>
 
-                {% endif %}
 
-            {% else %}
 
-                <a href="{% url 'create_auction' product.id %}">
-                    Create Auction
-                </a>
+<div class="bg-white rounded-xl shadow-lg p-6">
 
-            {% endif %}
 
-        {% endif %}
 
-    {% endfor %}
+
+
+<h3 class="text-2xl font-bold text-gray-800 mb-4">
+
+{{ product.name }}
+
+</h3>
+
+
+
+
+
+
+<div class="space-y-2 text-gray-700">
+
+
+<p>
+
+Category:
+
+<span class="font-semibold">
+
+{{ product.category }}
+
+</span>
+
+</p>
+
+
+
+
+<p>
+
+Price:
+
+{% if product.price %}
+
+
+<span class="font-bold text-green-700">
+
+৳{{ product.price }}
+
+</span>
+
 
 {% else %}
 
-    <p>
-        You have not added any products yet.
-    </p>
+
+No fixed price
+
 
 {% endif %}
 
-<br><br>
+</p>
 
-<a href="{% url 'seller_dashboard' %}">
-    Back to Seller Dashboard
+
+
+
+
+<p>
+
+Stock:
+
+{{ product.stock_quantity }}
+
+{{ product.get_unit_display }}
+
+</p>
+
+
+
+
+
+<p>
+
+Selling Type:
+
+{{ product.get_selling_type_display }}
+
+</p>
+
+
+
+
+
+<p>
+
+Verification:
+
+<span class="font-semibold">
+
+{{ product.get_verification_status_display }}
+
+</span>
+
+</p>
+
+
+
+
+
+<p>
+
+Available:
+
+{% if product.is_available %}
+
+
+<span class="text-green-700 font-semibold">
+
+Yes
+
+</span>
+
+
+{% else %}
+
+
+<span class="text-red-600 font-semibold">
+
+No
+
+</span>
+
+
+{% endif %}
+
+
+</p>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- ACTION BUTTONS -->
+
+
+<div class="mt-6 flex flex-wrap gap-3">
+
+
+
+
+
+<a
+
+href="{% url 'product_detail' product.id %}"
+
+class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700"
+
+>
+
+View Details
+
 </a>
 
-</body>
-</html>
+
+
+
+
+<a
+
+href="{% url 'edit_product' product.id %}"
+
+class="bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600"
+
+>
+
+Edit
+
+</a>
+
+
+
+
+
+<a
+
+href="{% url 'delete_product' product.id %}"
+
+class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700"
+
+>
+
+Delete
+
+</a>
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<!-- AUCTION SECTION -->
+
+
+{% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
+
+
+
+
+<div class="mt-6 bg-gray-50 rounded-lg p-5">
+
+
+
+<h4 class="text-xl font-bold mb-3">
+
+Auction
+
+</h4>
+
+
+
+
+
+{% if product.auction %}
+
+
+
+
+
+<p>
+
+Status:
+
+<strong>
+
+{{ product.auction.get_status_display }}
+
+</strong>
+
+</p>
+
+
+
+
+
+<p>
+
+Start:
+
+{{ product.auction.start_time }}
+
+</p>
+
+
+
+
+
+<p>
+
+End:
+
+{{ product.auction.end_time }}
+
+</p>
+
+
+
+
+
+
+{% if product.auction.status == 'upcoming' %}
+
+
+
+<a
+
+href="{% url 'edit_auction' product.auction.id %}"
+
+class="inline-block mt-4 text-blue-600 font-semibold"
+
+>
+
+Edit Auction
+
+</a>
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+{% else %}
+
+
+
+
+<a
+
+href="{% url 'create_auction' product.id %}"
+
+class="inline-block bg-purple-600 text-white px-5 py-2 rounded-lg"
+
+>
+
+Create Auction
+
+</a>
+
+
+
+
+{% endif %}
+
+
+
+</div>
+
+
+
+
+{% endif %}
+
+
+
+
+
+</div>
+
+
+
+
+{% endfor %}
+
+
+
+
+</div>
+
+
+
+
+
+
+{% else %}
+
+
+
+
+<div class="bg-white rounded-xl shadow p-8">
+
+
+<p class="text-xl text-gray-600">
+
+You have not added any products yet.
+
+</p>
+
+
+</div>
+
+
+
+
+
+{% endif %}
+
+
+
+
+
+
+
+<a
+
+href="{% url 'seller_dashboard' %}"
+
+class="inline-block mt-8 text-green-700 font-semibold"
+
+>
+
+← Back to Seller Dashboard
+
+</a>
+
+
+
+
+</div>
+
+
+
+
+{% endblock %}

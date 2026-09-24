@@ -6,6 +6,13 @@ from django.contrib.auth import authenticate, login, logout
 from .forms import RegisterForm, ProfileUpdateForm
 
 
+def home_view(request):
+
+    if request.user.is_authenticated:
+        return redirect('profile')
+
+    return redirect('login')
+
 def register_view(request):
     if request.method == 'POST':
         form = RegisterForm(request.POST)

@@ -8,7 +8,7 @@ from products.models import Product
 from .forms import CheckoutForm
 from .models import Cart, CartItem, Order, OrderItem
 from django.utils import timezone
-
+from reviews.models import Review
 
 @login_required
 def add_to_cart_view(request, product_id):
@@ -268,14 +268,31 @@ def order_success_view(request):
 
 @login_required
 def my_orders_view(request):
+
     orders = Order.objects.filter(
         buyer=request.user
-    ).prefetch_related('items').order_by('-created_at')
+    ).prefetch_related(
+        'items'
+    ).order_by('-created_at')
+
+
+    for order in orders:
+
+        for item in order.items.all():
+
+            item.has_review = Review.objects.filter(
+                buyer=request.user,
+                product=item.product,
+                order=order
+            ).exists()
+
 
     return render(
         request,
         'orders/my_orders.html',
-        {'orders': orders}
+        {
+            'orders': orders
+        }
     )
 
 @login_required

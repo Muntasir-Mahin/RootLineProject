@@ -1,27 +1,100 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Delete Product | RootLine</title>
-</head>
-<body>
+{% extends 'base.html' %}
 
-<h2>Delete Product</h2>
 
-<p>
-    Are you sure you want to delete
-    <strong>{{ product.name }}</strong>?
+{% block content %}
+
+
+
+<div class="min-h-[70vh] flex items-center justify-center">
+
+
+
+<div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md text-center">
+
+
+
+
+
+<h2 class="text-3xl font-bold text-red-600 mb-5">
+
+Delete Product
+
+</h2>
+
+
+
+
+
+<p class="text-gray-700 text-lg mb-8">
+
+Are you sure you want to delete
+
+<strong class="text-gray-900">
+
+{{ product.name }}
+
+</strong>
+
+?
+
 </p>
 
+
+
+
+
+
+
 <form method="POST">
-    {% csrf_token %}
-    <button type="submit">Yes, Delete</button>
+
+
+{% csrf_token %}
+
+
+
+<button
+
+type="submit"
+
+class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
+
+>
+
+Yes, Delete
+
+</button>
+
+
+
 </form>
 
-<br>
 
-<a href="{% url 'my_products' %}">
-    Cancel
+
+
+
+
+<a
+
+href="{% url 'my_products' %}"
+
+class="block mt-5 text-gray-600 font-semibold hover:text-gray-900"
+
+>
+
+Cancel
+
 </a>
 
-</body>
-</html>
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+{% endblock %}

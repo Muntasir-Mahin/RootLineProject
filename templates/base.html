@@ -1,0 +1,167 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html>
+
+
+<head>
+
+
+<title>
+    RootLine
+</title>
+
+
+
+<link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+
+</head>
+
+
+
+
+<body class="bg-gray-100 min-h-screen">
+
+
+
+
+
+<!-- NAVBAR -->
+
+<nav class="bg-green-700 text-white shadow-md">
+
+<div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+
+
+    <!-- Logo -->
+
+    <a href="{% url 'marketplace' %}"
+       class="text-3xl font-bold">
+
+        🌱 RootLine
+
+    </a>
+
+
+
+
+    <!-- Links -->
+
+    <div class="flex gap-8 items-center">
+
+
+        <a href="{% url 'marketplace' %}"
+           class="hover:text-green-200">
+            Marketplace
+        </a>
+
+
+        <a href="{% url 'auction_list' %}"
+           class="hover:text-green-200">
+            Auctions
+        </a>
+
+
+
+        {% if user.is_authenticated %}
+
+
+        <a href="{% url 'cart' %}"
+           class="hover:text-green-200">
+            🛒 Cart
+        </a>
+
+
+        <a href="{% url 'my_orders' %}"
+           class="hover:text-green-200">
+            Orders
+        </a>
+
+
+        <a href="{% url 'profile' %}"
+           class="hover:text-green-200">
+            Profile
+        </a>
+
+
+        <form method="POST" action="{% url 'logout' %}">
+            {% csrf_token %}
+
+            <button class="hover:text-red-300">
+
+                Logout
+
+            </button>
+
+        </form>
+
+
+        {% endif %}
+
+
+    </div>
+
+
+</div>
+
+</nav>
+
+
+
+
+<!-- MAIN CONTENT -->
+
+
+<main class="container mx-auto p-6">
+
+
+
+{% block content %}
+
+
+
+{% endblock %}
+
+
+
+</main>
+
+
+
+
+
+
+
+
+
+<!-- FOOTER -->
+
+
+<footer class="bg-green-700 text-white mt-10">
+
+
+<div class="container mx-auto p-5 text-center">
+
+
+<p>
+
+© 2026 RootLine. Organic Marketplace Platform.
+
+</p>
+
+
+</div>
+
+
+</footer>
+
+
+
+
+
+
+</body>
+
+
+</html>
