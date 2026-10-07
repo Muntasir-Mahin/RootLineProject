@@ -1,10 +1,12 @@
 {% load static %}
 
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
 
 <head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 
 <title>
@@ -14,6 +16,7 @@
 
 
 <link rel="stylesheet" href="{% static 'css/output.css' %}">
+<link rel="stylesheet" href="{% static 'css/theme.css' %}">
 
 
 </head>
@@ -21,7 +24,7 @@
 
 
 
-<body class="bg-gray-100 min-h-screen">
+<body class="rootline-app bg-gray-100 min-h-screen">
 
 
 
@@ -29,7 +32,7 @@
 
 <!-- NAVBAR -->
 
-<nav class="bg-green-700 text-white shadow-md">
+<nav class="site-nav bg-green-700 text-white shadow-md" aria-label="Main navigation">
 
 <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
 
@@ -113,7 +116,7 @@
 <!-- MAIN CONTENT -->
 
 
-<main class="container mx-auto p-6">
+<main class="site-content container mx-auto p-6">
 
 
 
@@ -138,7 +141,7 @@
 <!-- FOOTER -->
 
 
-<footer class="bg-green-700 text-white mt-10">
+<footer class="site-footer bg-green-700 text-white mt-10">
 
 
 <div class="container mx-auto p-5 text-center">
