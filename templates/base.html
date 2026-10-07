@@ -42,7 +42,7 @@
     <a href="{% url 'marketplace' %}"
        class="text-3xl font-bold">
 
-        🌱 RootLine
+        <span class="brand-mark">{% include 'components/icon.html' with name='leaf' %}</span> RootLine
 
     </a>
 
@@ -72,7 +72,7 @@
 
         <a href="{% url 'cart' %}"
            class="hover:text-green-200">
-            🛒 Cart
+            Cart
         </a>
 
 
@@ -83,8 +83,8 @@
 
 
         <a href="{% url 'profile' %}"
-           class="hover:text-green-200">
-            Profile
+           class="nav-account hover:text-green-200">
+            My account
         </a>
 
 

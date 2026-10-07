@@ -1,421 +1,59 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
+<div class="account-page">
+  <header class="account-heading">
+    <div><p class="section-eyebrow">YOUR ROOTLINE</p><h2>My account</h2><p class="page-description">A little space for everything you grow, discover, and love.</p></div>
+    <a href="{% url 'marketplace' %}" class="outline-action">Explore marketplace {% include 'components/icon.html' with name='arrow' %}</a>
+  </header>
 
+  <div class="account-layout">
+    <aside class="profile-panel surface">
+      <div class="avatar">{{ user.first_name|default:user.username|slice:':1'|upper }}{{ user.last_name|slice:':1'|upper }}</div>
+      <h3>{{ user.get_full_name|default:user.username }}</h3>
+      <p class="profile-handle">@{{ user.username }}</p>
+      <span class="member-label">RootLine member</span>
+      <div class="panel-divider"></div>
+      <p class="section-eyebrow">PERSONAL DETAILS</p>
+      <dl class="profile-details">
+        <div><dt>Name</dt><dd>{{ user.get_full_name|default:'Not provided' }}</dd></div>
+        <div><dt>Email</dt><dd>{{ user.email|default:'Not provided' }}</dd></div>
+        <div><dt>Phone</dt><dd>{{ user.phone_number|default:'Not provided' }}</dd></div>
+        <div><dt>Address</dt><dd>{{ user.address|default:'Not provided' }}</dd></div>
+      </dl>
+      <a href="{% url 'edit_profile' %}" class="outline-action full-action">{% include 'components/icon.html' with name='edit' %} Edit profile</a>
+    </aside>
 
+    <div class="account-main">
+      <section aria-labelledby="quick-links-title">
+        <div class="section-heading"><h3 id="quick-links-title">Your everyday essentials</h3><span>Quick links</span></div>
+        <div class="shortcut-grid">
+          <a href="{% url 'marketplace' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='bag' %}</span><span><strong>Marketplace</strong><small>Find your next fresh favorite</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
+          <a href="{% url 'cart' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='cart' %}</span><span><strong>My cart</strong><small>Pick up where you left off</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
+          <a href="{% url 'my_orders' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='box' %}</span><span><strong>My orders</strong><small>Keep track of your purchases</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
+          <a href="{% url 'auction_list' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='auction' %}</span><span><strong>Auctions</strong><small>Discover something worth bidding on</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
+        </div>
+      </section>
 
-<div class="max-w-5xl mx-auto">
+      <section class="seller-panel" aria-labelledby="seller-title">
+        <div class="seller-copy"><span class="section-eyebrow">GROW WITH ROOTLINE</span><h3 id="seller-title">Good things start with you.</h3>
+          {% if user.seller_approved %}<p>Your seller account is approved. Your next great listing is just a step away.</p><span class="status-pill">Seller Status: Approved</span>
+          {% elif user.seller_requested %}<p>We've received your seller request. Your application is awaiting approval.</p><span class="status-pill pending">Seller Status: Pending Approval</span>
+          {% else %}<p>Bring your organic products to a community that cares about what they buy.</p><span class="seller-status">Seller Status: Not a Seller</span>{% endif %}
+        </div>
+        <div class="seller-action">
+          <span class="seller-leaf">{% include 'components/icon.html' with name='leaf' %}</span>
+          {% if user.seller_approved %}<a href="{% url 'seller_dashboard' %}" class="primary-action">Go to Seller Dashboard {% include 'components/icon.html' with name='arrow' %}</a>
+          {% elif not user.seller_requested %}<form method="POST" action="{% url 'become_seller' %}">{% csrf_token %}<button type="submit" class="primary-action">Become a Seller {% include 'components/icon.html' with name='arrow' %}</button></form>{% endif %}
+        </div>
+      </section>
 
-
-
-
-
-<!-- PROFILE CARD -->
-
-
-<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-
-
-<h2 class="text-4xl font-bold text-gray-800 mb-6">
-
-My Profile
-
-</h2>
-
-
-
-
-<div class="space-y-3 text-gray-700">
-
-
-<p>
-
-Name:
-
-<span class="font-semibold">
-
-{{ user.first_name }} {{ user.last_name }}
-
-</span>
-
-</p>
-
-
-
-<p>
-
-Username:
-
-<span class="font-semibold">
-
-{{ user.username }}
-
-</span>
-
-</p>
-
-
-
-<p>
-
-Email:
-
-{{ user.email }}
-
-</p>
-
-
-
-
-<p>
-
-Phone:
-
-{{ user.phone_number }}
-
-</p>
-
-
-
-
-<p>
-
-Address:
-
-{{ user.address }}
-
-</p>
-
-
-
+      <section class="settings-panel surface" aria-labelledby="settings-title">
+        <div class="section-heading"><h3 id="settings-title">Account settings</h3><span>Make yourself at home</span></div>
+        <a href="{% url 'edit_profile' %}" class="settings-row"><span class="settings-icon">{% include 'components/icon.html' with name='edit' %}</span><span><strong>Edit profile</strong><small>Keep your personal details up to date</small></span>{% include 'components/icon.html' with name='arrow' %}</a>
+        <a href="{% url 'change_password' %}" class="settings-row"><span class="settings-icon">{% include 'components/icon.html' with name='lock' %}</span><span><strong>Change password</strong><small>Keep your account secure</small></span>{% include 'components/icon.html' with name='arrow' %}</a>
+        <form method="POST" action="{% url 'logout' %}" class="signout-form">{% csrf_token %}<button type="submit" class="signout-action">{% include 'components/icon.html' with name='logout' %} Logout</button><span>See you again soon.</span></form>
+      </section>
+    </div>
+  </div>
 </div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- QUICK LINKS -->
-
-
-<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-
-
-<h3 class="text-2xl font-bold text-gray-800 mb-5">
-
-Quick Links
-
-</h3>
-
-
-
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-
-
-<a
-
-href="{% url 'marketplace' %}"
-
-class="bg-green-700 text-white p-4 rounded-lg text-center hover:bg-green-800"
-
->
-
-🛒 Marketplace
-
-</a>
-
-
-
-
-<a
-
-href="{% url 'cart' %}"
-
-class="bg-blue-600 text-white p-4 rounded-lg text-center hover:bg-blue-700"
-
->
-
-🛍 My Cart
-
-</a>
-
-
-
-
-
-<a
-
-href="{% url 'my_orders' %}"
-
-class="bg-purple-600 text-white p-4 rounded-lg text-center hover:bg-purple-700"
-
->
-
-📦 My Orders
-
-</a>
-
-
-
-
-
-<a
-
-href="{% url 'auction_list' %}"
-
-class="bg-orange-500 text-white p-4 rounded-lg text-center hover:bg-orange-600"
-
->
-
-🔨 Auctions
-
-</a>
-
-
-
-</div>
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- SELLER STATUS -->
-
-
-<div class="bg-white rounded-2xl shadow-lg p-8 mb-8">
-
-
-<h3 class="text-2xl font-bold mb-5">
-
-Seller Status
-
-</h3>
-
-
-
-
-
-{% if user.seller_approved %}
-
-
-
-
-<div class="bg-green-100 text-green-700 p-4 rounded-lg">
-
-
-<p class="font-semibold">
-
-Seller Status: Approved
-
-</p>
-
-
-
-<a
-
-href="{% url 'seller_dashboard' %}"
-
-class="inline-block mt-4 bg-green-700 text-white px-5 py-2 rounded-lg"
-
->
-
-Go to Seller Dashboard
-
-</a>
-
-
-
-</div>
-
-
-
-
-
-
-{% elif user.seller_requested %}
-
-
-
-
-<div class="bg-yellow-100 text-yellow-700 p-4 rounded-lg">
-
-
-<p class="font-semibold">
-
-Seller Status: Pending Approval
-
-</p>
-
-
-</div>
-
-
-
-
-
-
-{% else %}
-
-
-
-
-<div class="bg-gray-100 p-5 rounded-lg">
-
-
-<p class="font-semibold">
-
-Seller Status: Not a Seller
-
-</p>
-
-
-
-
-<form method="POST"
-action="{% url 'become_seller' %}"
-class="mt-4">
-
-
-{% csrf_token %}
-
-
-
-<button
-
-type="submit"
-
-class="bg-green-700 text-white px-6 py-3 rounded-lg hover:bg-green-800"
-
->
-
-Become a Seller
-
-</button>
-
-
-
-</form>
-
-
-
-</div>
-
-
-
-
-
-{% endif %}
-
-
-
-</div>
-
-
-
-
-
-
-
-
-<!-- ACCOUNT ACTIONS -->
-
-
-<div class="bg-white rounded-2xl shadow-lg p-8">
-
-
-
-<h3 class="text-2xl font-bold mb-5">
-
-Account Settings
-
-</h3>
-
-
-
-
-<a
-
-href="{% url 'edit_profile' %}"
-
-class="block text-green-700 font-semibold mb-4"
-
->
-
-✏️ Edit Profile
-
-</a>
-
-
-
-
-
-<a
-
-href="{% url 'change_password' %}"
-
-class="block text-blue-700 font-semibold mb-5"
-
->
-
-🔒 Change Password
-
-</a>
-
-
-
-
-
-<form method="POST"
-action="{% url 'logout' %}">
-
-
-{% csrf_token %}
-
-
-
-<button
-
-type="submit"
-
-class="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700"
-
->
-
-Logout
-
-</button>
-
-
-
-</form>
-
-
-
-
-</div>
-
-
-
-
-
-</div>
-
-
-
 {% endblock %}

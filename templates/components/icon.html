@@ -1,0 +1,11 @@
+<svg class="ui-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+{% if name == 'bag' %}<path d="M6 7h12l2 14H4L6 7Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>
+{% elif name == 'cart' %}<path d="M3 3h2l3 12h11l2-8H6M9 19h.01M18 19h.01"/><circle cx="9" cy="19" r="1"/><circle cx="18" cy="19" r="1"/>
+{% elif name == 'box' %}<path d="m12 3 9 5-9 5-9-5 9-5ZM3 8v9l9 5 9-5V8M12 13v9M7 5.8l9 5"/>
+{% elif name == 'auction' %}<path d="m14 4 6 6M8 10l6 6M4 20l10-10M12 6l6 6M3 22h8"/>
+{% elif name == 'lock' %}<rect x="5" y="10" width="14" height="11" rx="3"/><path d="M8 10V7a4 4 0 0 1 8 0v3M12 14v3"/>
+{% elif name == 'edit' %}<path d="m15 4 5 5M4 20l5-1L20 8a3.5 3.5 0 0 0-5-5L4 14l-1 7 6-2"/>
+{% elif name == 'leaf' %}<path d="M20 3c0 12-4 16-10 16a7 7 0 0 1-7-7C3 6 9 3 20 3ZM4 21 15 10"/>
+{% elif name == 'logout' %}<path d="M9 4H4v16h5M10 12h11m-4-4 4 4-4 4"/>
+{% else %}<path d="M5 12h14m-5-5 5 5-5 5"/>{% endif %}
+</svg>
