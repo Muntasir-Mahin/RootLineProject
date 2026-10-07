@@ -1,795 +1,276 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
-<h2 class="text-4xl font-bold text-gray-800 mb-8">
-
-Incoming Orders
-
-</h2>
-
-
-
-
+<div class="workflow-page page-seller-orders">
+<header class="page-heading"><p class="section-eyebrow">SELLER STUDIO</p><h1>Incoming Orders</h1><p class="page-description">Keep your customers in the loop, every step of the way.</p></header>
 {% if orders %}
-
-
-
 {% for order in orders %}
-
-
-
-<div class="bg-white rounded-xl shadow-lg p-6 mb-8">
-
-
-
+<div class="bg-white rounded-xl shadow-lg p-6 mb-8 ui-card order-card">
 <h3 class="text-2xl font-bold mb-6">
-
 Order #{{ order.id }}
-
 </h3>
-
-
-
-
-
 <!-- BUYER INFO -->
-
-
 <div class="bg-gray-50 rounded-lg p-5 mb-6">
-
-
 <h4 class="text-xl font-bold mb-3">
-
 Buyer Information
-
 </h4>
-
-
-
 <p>
 Buyer:
 <strong>
 {{ order.buyer.username }}
 </strong>
 </p>
-
-
 <p>
 Recipient:
 {{ order.recipient_name }}
 </p>
-
-
 <p>
 Email:
 {{ order.email }}
 </p>
-
-
 <p>
 Phone:
 {{ order.phone_number }}
 </p>
-
-
 <p>
 Address:
 {{ order.delivery_address }}
 </p>
-
-
 </div>
-
-
-
-
-
-
-
-
 <!-- PAYMENT -->
-
-
 <div class="bg-gray-50 rounded-lg p-5 mb-6">
-
-
 <h4 class="text-xl font-bold mb-3">
-
 Payment Information
-
 </h4>
-
-
-
 <p>
-
 Payment Method:
-
 {{ order.get_payment_method_display }}
-
 </p>
-
-
-
-
 {% if order.payment %}
-
-
-
 <p>
-
 Payment Status:
-
 <strong>
-
 {{ order.payment.get_payment_status_display }}
-
 </strong>
-
 </p>
-
-
-
 <p>
-
 Escrow:
-
 <strong>
-
 {{ order.payment.get_escrow_status_display }}
-
 </strong>
-
 </p>
-
-
-
-
 {% if order.payment.payment_status == 'verification_pending' %}
-
-
 <p class="text-yellow-600">
-
 Waiting for admin verification.
-
 </p>
-
-
-
 {% elif order.payment.payment_status == 'paid' %}
-
-
-
 <p class="text-green-700">
-
 Payment verified successfully.
-
 </p>
-
-
-
 {% elif order.payment.payment_status == 'failed' %}
-
-
-
 <p class="text-red-600">
-
 Payment verification failed.
-
 </p>
-
-
-
 {% elif order.payment.payment_status == 'refunded' %}
-
-
-
 <p class="text-red-600">
-
 Payment refunded to buyer.
-
 </p>
-
-
-
 {% endif %}
-
-
-
-
 {% else %}
-
-
 <p>
-
 Payment record not available.
-
 </p>
-
-
 {% endif %}
-
-
-
 </div>
-
-
-
-
-
-
-
-
 <!-- ORDER STATUS -->
-
-
 <div class="mb-6">
-
-
 <h4 class="text-xl font-bold">
-
 Order Status
-
 </h4>
-
-
-
 <p class="mt-2">
-
 <strong class="text-green-700">
-
 {{ order.get_status_display }}
-
 </strong>
-
-
 </p>
-
-
 </div>
-
-
-
-
-
-
-
-
 <!-- DISPUTE -->
-
-
 {% if order.dispute %}
-
-
-
 <div class="border border-red-300 bg-red-50 rounded-lg p-5 mb-6">
-
-
 <h4 class="text-xl font-bold text-red-700">
-
 Dispute Information
-
 </h4>
-
-
-
-
 <p class="mt-3">
-
 Status:
-
 <strong>
-
 {{ order.dispute.get_status_display }}
-
 </strong>
-
 </p>
-
-
-
 <p>
-
 Reason:
-
 {{ order.dispute.get_reason_display }}
-
 </p>
-
-
-
 <p>
-
 Buyer Complaint:
-
 {{ order.dispute.description }}
-
 </p>
-
-
-
-
 <p>
-
 Your Response:
-
 {% if order.dispute.seller_response %}
-
 {{ order.dispute.seller_response }}
-
 {% else %}
-
 No response submitted yet.
-
 {% endif %}
-
 </p>
-
-
-
-
 <p>
-
 Admin Note:
-
 {% if order.dispute.admin_note %}
-
 {{ order.dispute.admin_note }}
-
 {% else %}
-
 Waiting for admin review.
-
 {% endif %}
-
 </p>
-
-
-
-
 {% if order.dispute.status == 'refund_approved' %}
-
-
-
 <p class="text-red-700 font-bold mt-3">
-
 Refund Approved
-
 </p>
-
-
-
 <p>
-
 Refund Amount:
-
-৳{{ order.payment.amount }}
-
+৳{{ order.payment.amount|floatformat:2 }}
 </p>
-
-
-
 {% endif %}
-
-
-
-
-
 {% if order.dispute.resolved_by %}
-
-
 <p>
-
 Resolved By:
-
 {{ order.dispute.resolved_by.username }}
-
 </p>
-
-
 {% endif %}
-
-
-
-
 {% if order.dispute.resolved_at %}
-
-
 <p>
-
 Resolved At:
-
 {{ order.dispute.resolved_at }}
-
 </p>
-
-
 {% endif %}
-
-
-
-
-
 {% if order.dispute.status == 'open' or order.dispute.status == 'seller_responded' or order.dispute.status == 'under_review' %}
-
-
-
 <a
-
 href="{% url 'seller_dispute_response' order.dispute.id %}"
-
-class="inline-block mt-4 bg-red-600 text-white px-5 py-2 rounded-lg"
-
+class="inline-block mt-4 px-5 py-2 rounded-lg danger-action"
 >
-
 Respond to Dispute
-
 </a>
-
-
-
 {% endif %}
-
-
-
 </div>
-
-
-
 {% endif %}
-
-
-
-
-
-
-
-
 <!-- ACTIONS -->
-
-
 <div class="mb-6">
-
-
 <h4 class="text-xl font-bold mb-3">
-
 Seller Actions
-
 </h4>
-
-
-
-
 {% if order.status == 'pending' %}
-
-
-
 <form method="POST"
-action="{% url 'update_order_status' order.id %}">
-
-
+action="{% url 'update_order_status' order.id %}" class="modern-form">
 {% csrf_token %}
-
-
-
 <button
-
 name="action"
-
 value="confirm"
-
-class="bg-green-700 text-white px-5 py-2 rounded-lg mr-3"
-
+class="px-5 py-2 rounded-lg mr-3 primary-action"
 >
-
 Confirm Order
-
 </button>
-
-
-
-
 <button
-
 name="action"
-
 value="cancel"
-
-class="bg-red-600 text-white px-5 py-2 rounded-lg"
-
+class="px-5 py-2 rounded-lg danger-action"
 >
-
 Cancel Order
-
 </button>
-
-
-
 </form>
-
-
-
-
-
-
 {% elif order.status == 'confirmed' %}
-
-
-
-
 {% if order.payment and order.payment.payment_status == 'paid' and order.payment.escrow_status == 'held' %}
-
-
-
 <p class="text-green-700">
-
 Payment verified. Ready to ship.
-
 </p>
-
-
-
 <form method="POST"
-action="{% url 'update_order_status' order.id %}">
-
-
+action="{% url 'update_order_status' order.id %}" class="modern-form">
 {% csrf_token %}
-
-
 <button
-
 name="action"
-
 value="ship"
-
-class="mt-3 bg-blue-600 text-white px-5 py-2 rounded-lg"
-
+class="mt-3 px-5 py-2 rounded-lg primary-action"
 >
-
 Mark as Shipped
-
 </button>
-
-
 </form>
-
-
-
-
 {% else %}
-
-
-
 <p>
-
 Waiting for payment verification.
-
 </p>
-
-
-
-
 {% endif %}
-
-
-
-
-
-
-
 {% elif order.status == 'shipped' %}
-
-
-
 <p>
-
 Order shipped.
-
 Waiting for buyer confirmation.
-
 </p>
-
-
-
-
-
-
-
 {% elif order.status == 'delivered' %}
-
-
-
 <p class="text-green-700 font-bold">
-
 Order completed.
-
 </p>
-
-
-
-
 {% if order.payment %}
-
-
 <p>
-
 Commission:
-
-৳{{ order.payment.commission_amount }}
-
+৳{{ order.payment.commission_amount|floatformat:2 }}
 </p>
-
-
 <p>
-
 Seller Amount:
-
-৳{{ order.payment.seller_amount }}
-
+৳{{ order.payment.seller_amount|floatformat:2 }}
 </p>
-
-
 <p>
-
 Escrow:
-
 {{ order.payment.get_escrow_status_display }}
-
 </p>
-
-
-
 {% endif %}
-
-
-
-
-
-
-
 {% elif order.status == 'cancelled' %}
-
-
 <p class="text-red-600">
-
 Order cancelled.
-
 </p>
-
-
-
 {% endif %}
-
-
-
-
 </div>
-
-
-
-
-
-
-
 <!-- ITEMS -->
-
-
 <div class="border-t pt-5">
-
-
 <h4 class="text-xl font-bold">
-
 Items
-
 </h4>
-
-
-
 {% for item in order.items.all %}
-
-
-
 <p class="mt-2">
-
 {{ item.product_name }}
-
 -
-
 {{ item.quantity }}
-
 {{ item.unit }}
-
 -
-
 ৳{{ item.price }}
-
 </p>
-
-
-
 {% empty %}
-
-
 <p>
-
 No items found.
-
 </p>
-
-
 {% endfor %}
-
-
-
-
-
 <h3 class="text-2xl font-bold mt-5">
-
 Total:
-
 <span class="text-green-700">
-
-৳{{ order.total_amount }}
-
+৳{{ order.total_amount|floatformat:2 }}
 </span>
-
 </h3>
-
-
-
 </div>
-
-
-
-
 </div>
-
-
-
 {% endfor %}
-
-
-
-
-
 {% else %}
-
-
-
-<div class="bg-white rounded-xl shadow p-8">
-
-
+<div class="bg-white rounded-xl shadow p-8 ui-card">
 <p class="text-xl text-gray-600">
-
 No orders received yet.
-
 </p>
-
-
 </div>
-
-
-
-
 {% endif %}
-
-
-
-
-
 <a href="{% url 'seller_dashboard' %}"
-
 class="inline-block mt-5 text-green-700 font-semibold">
-
 ← Back to Seller Dashboard
-
 </a>
-
-
-
-
+</div>
 {% endblock %}

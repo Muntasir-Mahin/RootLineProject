@@ -1,104 +1,28 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
+<div class="workflow-page page-add-review">
 <div class="min-h-[70vh] flex items-center justify-center">
-
-
-
-<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
-
-
-
-
-
-<h2 class="text-3xl font-bold text-gray-800 text-center mb-8">
-
-Review
-
-<span class="text-green-700">
-
-{{ product.name }}
-
-</span>
-
-</h2>
-
-
-
-
-
-
-
-<form method="POST" class="space-y-5">
-
-
+<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg ui-card">
+<header class="page-heading"><p class="section-eyebrow">YOUR EXPERIENCE MATTERS</p><h1>Review <span class="text-green-700"> {{ product.name }} </span></h1><p class="page-description">Help the community make thoughtful choices.</p></header>
+<form method="POST" class="space-y-5 modern-form">
 {% csrf_token %}
-
-
-
-
 <div class="space-y-4">
-
-
-{{ form.as_p }}
-
-
+{% include 'components/form_fields.html' %}
 </div>
-
-
-
-
-
-
 <button
-
 type="submit"
-
-class="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
-
+class="w-full py-3 rounded-lg font-semibold transition primary-action"
 >
-
 Submit Review
-
 </button>
-
-
-
-
 </form>
-
-
-
-
-
-
-
 <a
-
 href="{% url 'my_orders' %}"
-
 class="block text-center mt-6 text-green-700 font-semibold"
-
 >
-
 ← Back to Orders
-
 </a>
-
-
-
-
 </div>
-
-
-
 </div>
-
-
-
-
+</div>
 {% endblock %}

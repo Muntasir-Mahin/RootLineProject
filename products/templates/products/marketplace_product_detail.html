@@ -1,348 +1,69 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-<div class="bg-white rounded-xl shadow-lg p-8">
-
-
+<div class="workflow-page page-marketplace-product-detail">
+<div class="bg-white rounded-xl shadow-lg p-8 ui-card">
 <!-- PRODUCT HEADER -->
-
-<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-
-
+<div class="detail-grid grid grid-cols-1 md:grid-cols-2 gap-8">
 <div>
-
-
 {% if product.image %}
-
-<img
-src="{{ product.image.url }}"
+<img alt="{{ product.name }}" src="{{ product.image.url }}"
 class="w-full h-96 object-cover rounded-xl"
 >
-
-{% endif %}
-
-
+{% else %}<div class="product-placeholder detail-placeholder">{% include 'components/icon.html' with name='leaf' %}<span>{{ product.category }}</span></div>{% endif %}
 </div>
-
-
-
-
 <div>
-
-
-<h1 class="text-4xl font-bold text-gray-800 mb-4">
-    {{ product.name }}
-</h1>
-
-
-
+<header class="page-heading"><p class="section-eyebrow">THE ORGANIC MARKETPLACE</p><h1>{{ product.name }}</h1><p class="page-description">A closer look at your next fresh find.</p></header>
 <p class="text-gray-600">
-
 Seller:
-
 <span class="font-semibold">
 {{ product.seller.username }}
 </span>
-
 </p>
-
-
-
 {% if seller_rating %}
-
-
 <p class="mt-3 text-yellow-600 font-semibold">
-
 Seller Rating:
-
 ⭐ {{ seller_rating|floatformat:1 }}/5
-
 ({{ seller_review_count }} reviews)
-
 </p>
-
-
 {% else %}
-
-
 <p class="mt-3 text-gray-500">
-
 Seller Rating:
 No rating yet
-
 </p>
-
-
 {% endif %}
-
-
-
-
-
 <p class="mt-5 text-gray-700">
-
 Category:
 {{ product.category }}
-
 </p>
-
-
-
-
 <p class="text-2xl font-bold text-green-700 mt-5">
-
-
 {% if product.price %}
-
 ৳{{ product.price }}
-
 {% else %}
-
 No Fixed Price
-
 {% endif %}
-
-
 </p>
-
-
-
-
 <p class="mt-3 text-gray-600">
-
 Stock:
-
 {{ product.stock_quantity }}
-
 {{ product.get_unit_display }}
-
 </p>
-
-
-
 <p class="text-gray-600">
-
 Selling Type:
-
 {{ product.get_selling_type_display }}
-
 </p>
-
-
-
-
 <span class="inline-block mt-4 bg-green-100 text-green-700 px-4 py-2 rounded-full">
-
 ✓ Verified Organic Product
-
 </span>
-
-
-
-</div>
-
-
-</div>
-
-
-
-
-
-<!-- DESCRIPTION -->
-
-
-<div class="mt-10">
-
-
-<h3 class="text-2xl font-bold mb-3">
-
-Description
-
-</h3>
-
-
-<p class="text-gray-700">
-
-{{ product.description }}
-
-</p>
-
-
-</div>
-
-
-
-
-
-<hr class="my-10">
-
-
-
-
-
-
-<!-- REVIEWS -->
-
-
-<h2 class="text-3xl font-bold mb-5">
-
-Customer Reviews
-
-</h2>
-
-
-
-
-{% if average_rating %}
-
-
-<p class="text-yellow-600 font-bold text-xl">
-
-Average Rating:
-
-⭐ {{ average_rating|floatformat:1 }}/5
-
-</p>
-
-
-{% else %}
-
-
-<p class="text-gray-500">
-
-No ratings yet.
-
-</p>
-
-
-{% endif %}
-
-
-
-
-
-{% if reviews %}
-
-
-
-{% for review in reviews %}
-
-
-
-<div class="border rounded-lg p-5 mt-5">
-
-
-<p class="font-bold">
-
-{{ review.buyer.username }}
-
-</p>
-
-
-
-<p class="mt-2">
-
-Rating:
-
-{% if review.rating == 5 %}
-
-⭐⭐⭐⭐⭐
-
-{% elif review.rating == 4 %}
-
-⭐⭐⭐⭐
-
-{% elif review.rating == 3 %}
-
-⭐⭐⭐
-
-{% elif review.rating == 2 %}
-
-⭐⭐
-
-{% else %}
-
-⭐
-
-{% endif %}
-
-
-</p>
-
-
-
-<p class="mt-3 text-gray-700">
-
-{{ review.comment }}
-
-</p>
-
-
-
-<p class="text-sm text-gray-500 mt-2">
-
-{{ review.created_at }}
-
-</p>
-
-
-</div>
-
-
-
-{% endfor %}
-
-
-
-
-{% else %}
-
-
-<p class="text-gray-500">
-
-No reviews available.
-
-</p>
-
-
-
-{% endif %}
-
-
-
-
-
-
-
-<!-- BUY SECTION -->
-
-
+<div class="purchase-panel"><!-- BUY SECTION -->
 {% if product.selling_type == 'fixed' or product.selling_type == 'both' %}
-
-
 <hr class="my-10">
-
-
 <h2 class="text-2xl font-bold mb-4">
-
 Buy This Product
-
 </h2>
-
-
-
 <form method="POST"
 action="{% url 'add_to_cart' product.id %}"
-class="flex items-center gap-4">
-
-
+class="flex items-center gap-4 modern-form">
 {% csrf_token %}
-
-
-
 <input
 type="number"
 name="quantity"
@@ -352,232 +73,153 @@ step="0.01"
 max="{{ product.stock_quantity }}"
 class="border rounded-lg px-4 py-2 w-32"
 >
-
-
-
 <span>
-
 {{ product.get_unit_display }}
-
 </span>
-
-
-
 <button
 type="submit"
-class="bg-green-700 text-white px-6 py-2 rounded-lg hover:bg-green-800"
+class="px-6 py-2 rounded-lg primary-action"
 >
-
 Add to Cart
-
 </button>
-
-
-
 </form>
-
-
 {% endif %}
-
-
-
-
-
-
-
 <!-- WISHLIST -->
-
-
 <a
 href="{% url 'add_wishlist' product.id %}"
 class="inline-block mt-8 text-red-600 font-semibold"
 >
-
-❤️ Add to Wishlist
-
+{% include 'components/icon.html' with name='heart' %} Add to Wishlist
 </a>
-
-
-
-
-
-
-
 <!-- AUCTION -->
-
-
 {% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
-
-
-
 <hr class="my-10">
-
-
 <h2 class="text-2xl font-bold">
-
 Auction
-
 </h2>
-
-
-
 {% if auction %}
-
-
-
 <div class="mt-5 bg-gray-50 rounded-lg p-5">
-
-
 <p>
-
 Starting Price:
-
 <b>
-৳{{ auction.starting_price }}
+৳{{ auction.starting_price|floatformat:2 }}
 </b>
-
 </p>
-
-
-
 <p>
-
 Minimum Increment:
-
-৳{{ auction.minimum_increment }}
-
+৳{{ auction.minimum_increment|floatformat:2 }}
 </p>
-
-
-
 <p>
-
 Start:
-
 {{ auction.start_time }}
-
 </p>
-
-
-
 <p>
-
 End:
-
 {{ auction.end_time }}
-
 </p>
-
-
-
 <p>
-
 Status:
-
 {{ auction.get_status_display }}
-
 </p>
-
-
-
-
 {% if auction_is_active %}
-
-
 <a
 href="{% url 'auction_detail' auction.id %}"
-class="inline-block mt-4 bg-green-700 text-white px-5 py-2 rounded-lg"
+class="inline-block mt-4 px-5 py-2 rounded-lg primary-action"
 >
-
 View Auction / Place Bid
-
 </a>
-
-
-
 {% elif auction.status == 'upcoming' %}
-
-
 <p class="mt-3 text-gray-600">
-
 Auction has not started yet.
-
 </p>
-
-
 <a
 href="{% url 'auction_detail' auction.id %}"
 class="text-green-700 font-semibold"
 >
-
 View Auction
-
 </a>
-
-
-
 {% elif auction.status == 'ended' %}
-
-
 <p>
 This auction has ended.
 </p>
-
-
-
 {% else %}
-
-
 <p>
 Auction is not active.
 </p>
-
-
-
 {% endif %}
-
-
-
 </div>
-
-
-
 {% else %}
-
-
 <p class="text-gray-500">
-
 Seller has not created an auction yet.
-
 </p>
-
-
-
 {% endif %}
-
-
-
 {% endif %}
-
-
-
-
-
-
+</div>
+</div>
+</div>
+<!-- DESCRIPTION -->
+<div class="mt-10">
+<h3 class="text-2xl font-bold mb-3">
+Description
+</h3>
+<p class="text-gray-700">
+{{ product.description }}
+</p>
+</div>
+<hr class="my-10">
+<!-- REVIEWS -->
+<h2 class="text-3xl font-bold mb-5">
+Customer Reviews
+</h2>
+{% if average_rating %}
+<p class="text-yellow-600 font-bold text-xl">
+Average Rating:
+⭐ {{ average_rating|floatformat:1 }}/5
+</p>
+{% else %}
+<p class="text-gray-500">
+No ratings yet.
+</p>
+{% endif %}
+{% if reviews %}
+{% for review in reviews %}
+<div class="border rounded-lg p-5 mt-5">
+<p class="font-bold">
+{{ review.buyer.username }}
+</p>
+<p class="mt-2">
+Rating:
+{% if review.rating == 5 %}
+⭐⭐⭐⭐⭐
+{% elif review.rating == 4 %}
+⭐⭐⭐⭐
+{% elif review.rating == 3 %}
+⭐⭐⭐
+{% elif review.rating == 2 %}
+⭐⭐
+{% else %}
+⭐
+{% endif %}
+</p>
+<p class="mt-3 text-gray-700">
+{{ review.comment }}
+</p>
+<p class="text-sm text-gray-500 mt-2">
+{{ review.created_at }}
+</p>
+</div>
+{% endfor %}
+{% else %}
+<p class="text-gray-500">
+No reviews available.
+</p>
+{% endif %}
 <a
 href="{% url 'marketplace' %}"
 class="inline-block mt-10 text-green-700 font-semibold"
 >
-
 ← Back to Marketplace
-
 </a>
-
-
-
-
 </div>
-
-
-
+</div>
 {% endblock %}

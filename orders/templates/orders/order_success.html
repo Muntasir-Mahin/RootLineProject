@@ -1,229 +1,77 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
+<div class="workflow-page page-order-success">
 <div class="max-w-4xl mx-auto">
-
-
-<div class="bg-white shadow-xl rounded-2xl p-8 mb-8 text-center">
-
-
+<div class="bg-white shadow-xl rounded-2xl p-8 mb-8 text-center ui-card">
 <div class="text-green-600 text-6xl mb-4">
-
 ✓
-
 </div>
-
-
-
-<h1 class="text-4xl font-bold text-gray-800">
-
-Order Placed Successfully
-
-</h1>
-
-
-
+<header class="page-heading"><p class="section-eyebrow">THANK YOU FOR SHOPPING</p><h1>Order Placed Successfully</h1><p class="page-description">Your next fresh find is on its way to becoming yours.</p></header>
 <p class="text-gray-600 mt-3">
-
 Thank you for shopping with RootLine.
-
 </p>
-
-
-
 </div>
-
-
-
-
-
-
 {% for order in orders %}
-
-
-
-<div class="bg-white rounded-xl shadow-lg p-6 mb-6">
-
-
-
+<div class="bg-white rounded-xl shadow-lg p-6 mb-6 ui-card">
 <h2 class="text-2xl font-bold text-gray-800 mb-5">
-
 Order #{{ order.id }}
-
 </h2>
-
-
-
-
-
 <div class="space-y-2 text-gray-700">
-
-
 <p>
-
 Seller:
-
 <span class="font-semibold">
-
 {{ order.seller.username }}
-
 </span>
-
 </p>
-
-
-
 <p>
-
 Payment Method:
-
 {{ order.get_payment_method_display }}
-
 </p>
-
-
-
 <p>
-
 Status:
-
 <span class="font-semibold text-green-700">
-
 {{ order.get_status_display }}
-
 </span>
-
 </p>
-
-
-
 <p>
-
 Total:
-
 <span class="font-bold text-green-700">
-
-৳{{ order.total_amount }}
-
+৳{{ order.total_amount|floatformat:2 }}
 </span>
-
 </p>
-
-
-
 </div>
-
-
-
-
-
-
-
 <div class="mt-6">
-
-
 <h3 class="text-xl font-bold mb-3">
-
 Items
-
 </h3>
-
-
-
-
 {% for item in order.items.all %}
-
-
-
 <div class="border rounded-lg p-4 mb-3 bg-gray-50">
-
-
 <p class="font-semibold text-gray-800">
-
 {{ item.product_name }}
-
 </p>
-
-
-
 <p class="text-gray-600">
-
-
 Quantity:
-
 {{ item.quantity }}
-
 {{ item.unit }}
-
-
 </p>
-
-
-
 <p class="text-green-700 font-bold">
-
 ৳{{ item.price }}
-
 </p>
-
-
-
 </div>
-
-
-
 {% empty %}
-
-
 <p class="text-gray-500">
-
 No items found.
-
 </p>
-
-
-
 {% endfor %}
-
-
-
 </div>
-
-
-
-
 </div>
-
-
-
-
 {% endfor %}
-
-
-
-
-
-
 <a
-
 href="{% url 'marketplace' %}"
-
-class="inline-block bg-green-700 text-white px-8 py-3 rounded-lg hover:bg-green-800"
-
+class="inline-block px-8 py-3 rounded-lg primary-action"
 >
-
 Continue Shopping
-
 </a>
-
-
-
 </div>
-
-
-
+</div>
 {% endblock %}

@@ -1,72 +1,13 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-    <title>My Wishlist</title>
-</head>
-
-<body>
-
-
-<h2>
-    My Wishlist ❤️
-</h2>
-
-
-{% if wishlist %}
-
-
-{% for item in wishlist %}
-
-
-<hr>
-
-
-<h3>
-    {{ item.product.name }}
-</h3>
-
-
-<p>
-    Seller:
-    {{ item.product.seller.username }}
-</p>
-
-
-<p>
-    Price:
-    ৳{{ item.product.price }}
-</p>
-
-
-<a href="{% url 'marketplace_product_detail' item.product.id %}">
-    View Product
-</a>
-
-
-<br>
-
-
-<a href="{% url 'remove_wishlist' item.product.id %}">
-    Remove
-</a>
-
-
-{% endfor %}
-
-
-
-{% else %}
-
-
-<p>
-    No wishlist items.
-</p>
-
-
-{% endif %}
-
-
-</body>
-
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<div class="workflow-page page-wishlist">
+  {% include 'components/page_heading.html' with eyebrow='SAVED FOR LATER' title='My Wishlist' description='Keep the good things close. Come back when the time feels right.' %}
+  {% if wishlist %}<div class="catalog-grid">
+    {% for item in wishlist %}<article class="catalog-card surface">
+      <div class="catalog-image">{% if item.product.image %}<img src="{{ item.product.image.url }}" alt="{{ item.product.name }}">{% else %}<div class="product-placeholder">{% include 'components/icon.html' with name='leaf' %}<span>{{ item.product.category }}</span></div>{% endif %}</div>
+      <div class="catalog-body"><p class="catalog-seller">Seller: {{ item.product.seller.username }}</p><h3>{{ item.product.name }}</h3><p class="catalog-price">৳{{ item.product.price }}</p><a href="{% url 'marketplace_product_detail' item.product.id %}" class="outline-action full-action">View Product {% include 'components/icon.html' with name='arrow' %}</a><a href="{% url 'remove_wishlist' item.product.id %}" class="text-danger wishlist-remove">Remove</a></div>
+    </article>{% endfor %}
+  </div>{% else %}<div class="empty-state surface"><span class="empty-icon">{% include 'components/icon.html' with name='heart' %}</span><h3>A little room for your favorites</h3><p>No wishlist items.</p></div>{% endif %}
+  <a href="{% url 'marketplace' %}" class="back-link">← Back to Marketplace</a>
+</div>
+{% endblock %}

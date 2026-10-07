@@ -1,215 +1,62 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
+<div class="workflow-page page-seller-response">
 <div class="min-h-[70vh] flex items-center justify-center">
-
-
-
-<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg">
-
-
-
-
-
-<h2 class="text-4xl font-bold text-red-600 text-center mb-6">
-
-Respond to Dispute
-
-</h2>
-
-
-
-
-
-
-
+<div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-lg ui-card">
+<header class="page-heading"><p class="section-eyebrow">CUSTOMER CARE</p><h1>Respond to Dispute</h1><p class="page-description">Share your side and help resolve the issue.</p></header>
 <div class="bg-red-50 rounded-xl p-5 mb-6">
-
-
-
-
-
 <p>
-
 Dispute:
-
 <strong>
-
 #{{ dispute.id }}
-
 </strong>
-
 </p>
-
-
-
-
-
 <p class="mt-2">
-
 Order:
-
 <strong>
-
 #{{ dispute.order.id }}
-
 </strong>
-
 </p>
-
-
-
-
-
 <p class="mt-2">
-
 Buyer:
-
 <strong>
-
 {{ dispute.order.buyer.username }}
-
 </strong>
-
 </p>
-
-
-
-
-
 <p class="mt-2">
-
 Reason:
-
 {{ dispute.get_reason_display }}
-
 </p>
-
-
-
-
-
 <p class="mt-4 font-semibold">
-
 Buyer Complaint:
-
 </p>
-
-
-
 <p class="mt-2 text-gray-700">
-
 {{ dispute.description }}
-
 </p>
-
-
-
-
 </div>
-
-
-
-
-
-
-
 <hr class="my-6">
-
-
-
-
-
 <h3 class="text-2xl font-bold text-gray-800 mb-5">
-
 Your Response
-
 </h3>
-
-
-
-
-
-
-
-
-<form method="POST">
-
-
+<form method="POST" class="modern-form">
 {% csrf_token %}
-
-
-
-
-
-
 <div class="space-y-4">
-
-
-{{ form.as_p }}
-
-
+{% include 'components/form_fields.html' %}
 </div>
-
-
-
-
-
-
-
 <button
-
 type="submit"
-
-class="w-full mt-6 bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
-
+class="w-full mt-6 py-3 rounded-lg font-semibold transition danger-action"
 >
-
 Submit Response
-
 </button>
-
-
-
-
-
-
 </form>
-
-
-
-
-
-
-
 <a
-
 href="{% url 'seller_orders' %}"
-
 class="block text-center mt-6 text-green-700 font-semibold"
-
 >
-
 ← Back to Incoming Orders
-
 </a>
-
-
-
-
-
-
 </div>
-
-
-
 </div>
-
-
-
-
+</div>
 {% endblock %}

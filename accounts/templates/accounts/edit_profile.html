@@ -1,94 +1,28 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
+<div class="workflow-page page-edit-profile">
 <div class="min-h-[70vh] flex items-center justify-center">
-
-
-
-<div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg">
-
-
-
-<h2 class="text-4xl font-bold text-gray-800 text-center mb-8">
-
-Edit Profile
-
-</h2>
-
-
-
-
-
-<form method="POST" class="space-y-5">
-
-
+<div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg ui-card">
+<header class="page-heading"><p class="section-eyebrow">YOUR ACCOUNT</p><h1>Edit Profile</h1><p class="page-description">Make your details feel like you.</p></header>
+<form method="POST" class="space-y-5 modern-form">
 {% csrf_token %}
-
-
-
-
 <div class="space-y-4">
-
-
-{{ form.as_p }}
-
-
+{% include 'components/form_fields.html' %}
 </div>
-
-
-
-
-
 <button
-
 type="submit"
-
-class="w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
-
+class="w-full py-3 rounded-lg font-semibold transition primary-action"
 >
-
 Save Changes
-
 </button>
-
-
-
-
 </form>
-
-
-
-
-
-
-
 <a
-
 href="{% url 'profile' %}"
-
 class="block text-center mt-6 text-green-700 font-semibold"
-
 >
-
 ← Back to Profile
-
 </a>
-
-
-
-
-
 </div>
-
-
-
 </div>
-
-
-
-
+</div>
 {% endblock %}

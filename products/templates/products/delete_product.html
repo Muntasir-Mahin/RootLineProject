@@ -1,100 +1,32 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
+<div class="workflow-page page-delete-product">
 <div class="min-h-[70vh] flex items-center justify-center">
-
-
-
-<div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md text-center">
-
-
-
-
-
-<h2 class="text-3xl font-bold text-red-600 mb-5">
-
-Delete Product
-
-</h2>
-
-
-
-
-
+<div class="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md text-center ui-card">
+<header class="page-heading"><p class="section-eyebrow">MANAGE YOUR LISTING</p><h1>Delete Product</h1><p class="page-description">Review your product before removing it.</p></header>
 <p class="text-gray-700 text-lg mb-8">
-
 Are you sure you want to delete
-
 <strong class="text-gray-900">
-
 {{ product.name }}
-
 </strong>
-
 ?
-
 </p>
-
-
-
-
-
-
-
-<form method="POST">
-
-
+<form method="POST" class="modern-form">
 {% csrf_token %}
-
-
-
 <button
-
 type="submit"
-
-class="w-full bg-red-600 text-white py-3 rounded-lg font-semibold hover:bg-red-700 transition"
-
+class="w-full py-3 rounded-lg font-semibold transition danger-action"
 >
-
 Yes, Delete
-
 </button>
-
-
-
 </form>
-
-
-
-
-
-
 <a
-
 href="{% url 'my_products' %}"
-
 class="block mt-5 text-gray-600 font-semibold hover:text-gray-900"
-
 >
-
 Cancel
-
 </a>
-
-
-
-
 </div>
-
-
-
 </div>
-
-
-
-
+</div>
 {% endblock %}

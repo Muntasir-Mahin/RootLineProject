@@ -1,200 +1,61 @@
 {% extends 'base.html' %}
-
-
 {% block content %}
-
-
-
-<h2 class="text-4xl font-bold text-gray-800 mb-8">
-    Checkout
-</h2>
-
-
-
-
+<div class="workflow-page page-checkout">
+<header class="page-heading"><p class="section-eyebrow">YOUR NEXT FRESH FIND</p><h1>Checkout</h1><p class="page-description">Review your order and tell us where it should go.</p></header>
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-
-
-
-
-
 <!-- ORDER SUMMARY -->
-
-
-<div class="bg-white rounded-xl shadow-lg p-6">
-
-
+<div class="bg-white rounded-xl shadow-lg p-6 ui-card">
 <h3 class="text-2xl font-bold mb-5">
-
 Order Summary
-
 </h3>
-
-
-
-
 {% for item in cart_items %}
-
-
-
 <div class="border-b py-4">
-
-
 <h4 class="text-xl font-semibold">
-
 {{ item.product.name }}
-
 </h4>
-
-
-
 <p class="text-gray-600">
-
-
 Quantity:
-
 {{ item.quantity }}
-
 {{ item.product.get_unit_display }}
-
-
 </p>
-
-
-
-
 <p class="text-green-700 font-bold">
-
-
 ৳{{ item.product.price }}
-
 </p>
-
-
-
 </div>
-
-
-
 {% endfor %}
-
-
-
-
-
 <div class="mt-6">
-
-
 <h3 class="text-3xl font-bold">
-
-
 Total:
-
 <span class="text-green-700">
-
-৳{{ total_price }}
-
+৳{{ total_price|floatformat:2 }}
 </span>
-
-
 </h3>
-
-
-
 </div>
-
-
-
-
 </div>
-
-
-
-
-
-
-
-
 <!-- DELIVERY FORM -->
-
-
-<div class="bg-white rounded-xl shadow-lg p-6">
-
-
-
+<div class="bg-white rounded-xl shadow-lg p-6 ui-card">
 <h3 class="text-2xl font-bold mb-5">
-
 Delivery & Payment Information
-
 </h3>
-
-
-
-
-
-<form method="POST">
-
-
+<form method="POST" class="modern-form">
 {% csrf_token %}
-
-
-
 <div class="space-y-4">
-
-
-{{ form.as_p }}
-
-
+{% include 'components/form_fields.html' %}
 </div>
-
-
-
-
-
 <button
-
 type="submit"
-
-class="mt-6 w-full bg-green-700 text-white py-3 rounded-lg font-semibold hover:bg-green-800 transition"
-
+class="mt-6 w-full py-3 rounded-lg font-semibold transition primary-action"
 >
-
 Place Order
-
 </button>
-
-
-
-
 </form>
-
-
-
-
 </div>
-
-
-
-
 </div>
-
-
-
-
-
 <a
-
 href="{% url 'cart' %}"
-
 class="inline-block mt-8 text-green-700 font-semibold"
-
 >
-
 ← Back to Cart
-
 </a>
-
-
-
-
+</div>
 {% endblock %}
