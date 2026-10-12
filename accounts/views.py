@@ -3,6 +3,11 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
+from django.contrib import messages
+from django.http import JsonResponse
+from django.middleware.csrf import get_token
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_GET, require_http_methods
 from .forms import RegisterForm, ProfileUpdateForm
 
 
@@ -54,13 +59,29 @@ def become_seller_view(request):
 
     return redirect('profile')
 
+@never_cache
 @login_required
+@require_http_methods(['GET', 'POST'])
 def logout_view(request):
     if request.method == 'POST':
+        if request.POST.get('confirm') != 'yes':
+            return redirect('logout')
+        if request.POST.get('user_id') != str(request.user.pk):
+            messages.info(request, 'Your signed-in account changed. Please confirm logout again.')
+            return redirect('logout')
         logout(request)
         return redirect('login')
 
-    return redirect('profile')
+    return render(request, 'accounts/logout.html')
+
+
+@never_cache
+@require_GET
+def logout_token_view(request):
+    if not request.user.is_authenticated:
+        return JsonResponse({'signedOut': True})
+    return JsonResponse({'csrfToken': get_token(request), 'userId': request.user.pk})
+
 
 @login_required
 def edit_profile_view(request):

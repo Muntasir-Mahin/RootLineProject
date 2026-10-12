@@ -51,7 +51,7 @@
         <div class="section-heading"><h3 id="settings-title">Account settings</h3><span>Make yourself at home</span></div>
         <a href="{% url 'edit_profile' %}" class="settings-row"><span class="settings-icon">{% include 'components/icon.html' with name='edit' %}</span><span><strong>Edit profile</strong><small>Keep your personal details up to date</small></span>{% include 'components/icon.html' with name='arrow' %}</a>
         <a href="{% url 'change_password' %}" class="settings-row"><span class="settings-icon">{% include 'components/icon.html' with name='lock' %}</span><span><strong>Change password</strong><small>Keep your account secure</small></span>{% include 'components/icon.html' with name='arrow' %}</a>
-        <form method="POST" action="{% url 'logout' %}" class="signout-form">{% csrf_token %}<button type="submit" class="signout-action">{% include 'components/icon.html' with name='logout' %} Logout</button><span>See you again soon.</span></form>
+        <div class="signout-form"><a href="{% url 'logout' %}" class="signout-action">{% include 'components/icon.html' with name='logout' %} Logout</a><span>See you again soon.</span></div>
       </section>
     </div>
   </div>

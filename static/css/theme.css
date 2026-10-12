@@ -391,3 +391,8 @@
   font-size: .8125rem;
 }
 .site-content .password-toggle:hover { background: #dce8d2; }
+
+.logout-panel { max-width: 520px; margin: 2rem auto; padding: 2rem; }
+.logout-panel h1 { font-size: 1.75rem; font-weight: 650; margin-bottom: .75rem; }
+.logout-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: flex-end; }
+.logout-actions button:disabled { opacity: .65; cursor: wait; }

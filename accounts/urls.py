@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import (register_view, login_view, profile_view, logout_view, edit_profile_view,change_password_view,become_seller_view,
+from .views import (register_view, login_view, profile_view, logout_view, logout_token_view, edit_profile_view,change_password_view,become_seller_view,
                     seller_dashboard_view,home_view)
 from django.conf import settings
 from django.conf.urls.static import static
@@ -10,6 +10,7 @@ urlpatterns = [
     path('register/', register_view, name='register'),
     path('login/', login_view, name='login'),
     path('logout/', logout_view, name='logout'),
+    path('logout/token/', logout_token_view, name='logout_token'),
 
     path('profile/', profile_view, name='profile'),
     path('profile/edit/', edit_profile_view, name='edit_profile'),

@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<section class="logout-panel surface" aria-labelledby="logout-title">
+  <p class="section-eyebrow">YOUR ACCOUNT</p>
+  <h1 id="logout-title">Log out of RootLine?</h1>
+  <p class="page-description">You’re signed in as <strong>{{ user.username }}</strong>. Confirm to end this session.</p>
+  <form method="POST" action="{% url 'logout' %}" class="modern-form" data-confirm-logout
+        data-token-url="{% url 'logout_token' %}" data-login-url="{% url 'login' %}">
+    {% csrf_token %}
+    <input type="hidden" name="confirm" value="yes">
+    <input type="hidden" name="user_id" value="{{ user.pk }}">
+    <p class="form-errors" role="alert" data-logout-error hidden></p>
+    <div class="logout-actions">
+      <a href="{% url 'profile' %}" class="outline-action">Cancel</a>
+      <button type="submit" class="primary-action">Yes, log out</button>
+    </div>
+  </form>
+</section>
+<script src="{% static 'js/logout.js' %}" defer></script>
+{% endblock %}

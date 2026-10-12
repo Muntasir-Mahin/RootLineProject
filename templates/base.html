@@ -91,16 +91,7 @@
         </a>
 
 
-        <form method="POST" action="{% url 'logout' %}">
-            {% csrf_token %}
-
-            <button class="hover:text-red-300">
-
-                Logout
-
-            </button>
-
-        </form>
+        <a href="{% url 'logout' %}" class="hover:text-red-300">Logout</a>
 
 
         {% endif %}
