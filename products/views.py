@@ -1,3 +1,5 @@
+from django import forms
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
@@ -7,6 +9,8 @@ from .forms import ProductForm
 from .models import Product
 
 from reviews.models import Review
+from bidding.services import finalize_auction
+from wishlist.models import Wishlist
 
 
 # --------------------------------------------------
@@ -286,18 +290,14 @@ def marketplace_view(request):
     )
 
 
-    if min_price:
-
-        products = products.filter(
-            price__gte=min_price
-        )
-
-
-    if max_price:
-
-        products = products.filter(
-            price__lte=max_price
-        )
+    for value, lookup in [(min_price, 'price__gte'), (max_price, 'price__lte')]:
+        if value:
+            try:
+                price = forms.DecimalField(max_digits=10, decimal_places=2, min_value=0).clean(value)
+            except forms.ValidationError:
+                messages.error(request, 'Enter a valid non-negative price with at most two decimal places.')
+            else:
+                products = products.filter(**{lookup: price})
 
     # -------------------------
     # SORTING
@@ -401,19 +401,7 @@ def marketplace_product_detail_view(request, product_id):
             )
 
 
-        elif (
-            now >= auction.end_time
-            and auction.status == 'active'
-        ):
-
-            auction.status = 'ended'
-
-            auction.save(
-                update_fields=[
-                    'status'
-                ]
-            )
-
+        auction = finalize_auction(auction)
 
         auction_is_active = (
             auction.start_time <= now < auction.end_time
@@ -458,5 +446,10 @@ def marketplace_product_detail_view(request, product_id):
             'reviews': reviews,
 
             'average_rating': average_rating,
+            'seller_rating': seller_rating,
+            'seller_review_count': seller_review_count,
+            'is_favourite': request.user.is_authenticated and Wishlist.objects.filter(
+                user=request.user, product=product
+            ).exists(),
         }
     )

@@ -27,6 +27,9 @@ def add_review_view(request, product_id, order_id):
     )
 
 
+    if not order.items.filter(product=product).exists():
+        return redirect('my_orders')
+
     # Only delivered order can review
 
     if order.status != 'delivered':

@@ -287,6 +287,9 @@ def auction_winner_checkout_view(request, auction_id):
             auction_id=auction.id
         )
 
+    if auction.product.seller_id == request.user.id:
+        return redirect('auction_detail', auction_id=auction.id)
+
     # No winning bid
     if auction.winning_bid is None:
         return redirect(
@@ -338,7 +341,8 @@ def auction_winner_checkout_view(request, auction_id):
 
                 # Stock check
                 if (
-                    not product.is_available
+                    product.seller_id == request.user.id
+                    or not product.is_available
                     or product.stock_quantity < quantity
                 ):
                     return redirect(

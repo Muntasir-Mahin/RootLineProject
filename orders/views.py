@@ -1,5 +1,7 @@
-from decimal import Decimal, InvalidOperation
+from decimal import Decimal
 from payments.models import Payment
+from django.contrib import messages
+from django import forms
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -9,6 +11,13 @@ from .forms import CheckoutForm
 from .models import Cart, CartItem, Order, OrderItem
 from django.utils import timezone
 from reviews.models import Review
+
+
+def cart_quantity(value):
+    return forms.DecimalField(
+        max_digits=10, decimal_places=2, min_value=Decimal('0.01')
+    ).clean(value)
+
 
 @login_required
 def add_to_cart_view(request, product_id):
@@ -21,10 +30,14 @@ def add_to_cart_view(request, product_id):
         price__isnull=False,
     )
 
+    if product.seller_id == request.user.id:
+        messages.error(request, 'You cannot buy your own product.')
+        return redirect('marketplace_product_detail', product_id=product.id)
+
     if request.method == 'POST':
         try:
-            quantity = Decimal(request.POST.get('quantity', '1'))
-        except InvalidOperation:
+            quantity = cart_quantity(request.POST.get('quantity', '1'))
+        except forms.ValidationError:
             return redirect('marketplace_product_detail', product_id=product.id)
 
         if quantity <= 0:
@@ -85,8 +98,8 @@ def update_cart_item_view(request, item_id):
 
     if request.method == 'POST':
         try:
-            quantity = Decimal(request.POST.get('quantity', '1'))
-        except InvalidOperation:
+            quantity = cart_quantity(request.POST.get('quantity', '1'))
+        except forms.ValidationError:
             return redirect('cart')
 
         if quantity <= 0:
@@ -123,6 +136,10 @@ def checkout_view(request):
     if not cart_items.exists():
         return redirect('cart')
 
+    if cart_items.filter(product__seller=request.user).exists():
+        messages.error(request, 'Remove your own products from the cart before checking out.')
+        return redirect('cart')
+
     initial_data = {
         'recipient_name': request.user.get_full_name() or request.user.username,
         'email': request.user.email,
@@ -140,7 +157,9 @@ def checkout_view(request):
                 product = item.product
 
                 if (
-                    product.verification_status != 'verified'
+                    product.seller_id == request.user.id
+                    or item.quantity <= 0
+                    or product.verification_status != 'verified'
                     or not product.is_available
                     or product.selling_type not in ['fixed', 'both']
                     or product.price is None

@@ -76,6 +76,8 @@
         </a>
 
 
+        <a href="{% url 'my_wishlist' %}" class="hover:text-green-200">Wishlist</a>
+
         <a href="{% url 'my_orders' %}"
            class="hover:text-green-200">
             Orders
@@ -119,6 +121,12 @@
 <main class="site-content container mx-auto p-6">
 
 
+
+{% if messages %}
+<div role="status">
+{% for message in messages %}<p>{{ message }}</p>{% endfor %}
+</div>
+{% endif %}
 
 {% block content %}
 

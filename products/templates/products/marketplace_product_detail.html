@@ -55,7 +55,9 @@ Selling Type:
 ✓ Verified Organic Product
 </span>
 <div class="purchase-panel"><!-- BUY SECTION -->
-{% if product.selling_type == 'fixed' or product.selling_type == 'both' %}
+{% if product.seller_id == user.id %}
+<p>You cannot buy your own product.</p>
+{% elif product.selling_type == 'fixed' or product.selling_type == 'both' %}
 <hr class="my-10">
 <h2 class="text-2xl font-bold mb-4">
 Buy This Product
@@ -85,12 +87,21 @@ Add to Cart
 </form>
 {% endif %}
 <!-- WISHLIST -->
-<a
-href="{% url 'add_wishlist' product.id %}"
-class="inline-block mt-8 text-red-600 font-semibold"
->
+{% if is_favourite %}
+<form method="POST" action="{% url 'remove_wishlist' product.id %}">
+{% csrf_token %}
+<button type="submit" class="inline-block mt-8 text-red-600 font-semibold">
+{% include 'components/icon.html' with name='heart' %} Remove from Wishlist
+</button>
+</form>
+{% else %}
+<form method="POST" action="{% url 'add_wishlist' product.id %}">
+{% csrf_token %}
+<button type="submit" class="inline-block mt-8 text-red-600 font-semibold">
 {% include 'components/icon.html' with name='heart' %} Add to Wishlist
-</a>
+</button>
+</form>
+{% endif %}
 <!-- AUCTION -->
 {% if product.selling_type == 'bidding' or product.selling_type == 'both' %}
 <hr class="my-10">

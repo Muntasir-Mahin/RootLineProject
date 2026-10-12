@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.shortcuts import render, redirect, get_object_or_404
 
 from products.models import Product
@@ -7,11 +8,15 @@ from .models import Wishlist
 
 
 @login_required
+@require_POST
 def add_wishlist(request, product_id):
 
     product = get_object_or_404(
         Product,
-        id=product_id
+        id=product_id,
+        verification_status='verified',
+        is_available=True,
+        stock_quantity__gt=0,
     )
 
 
@@ -29,6 +34,7 @@ def add_wishlist(request, product_id):
 
 
 @login_required
+@require_POST
 def remove_wishlist(request, product_id):
 
     Wishlist.objects.filter(
