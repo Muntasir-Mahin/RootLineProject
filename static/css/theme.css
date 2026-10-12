@@ -377,3 +377,17 @@
 @media (max-width: 700px) { .order-card { grid-template-columns: 1fr; } }
 .form-field input[type=checkbox], .form-field input[type=radio] { width: 1rem; height: 1rem; accent-color: var(--accent); }
 .form-field input[type=checkbox] { display: inline-block; }
+
+/* Each password field has its own optional visibility control. */
+.password-field-control { display: flex; align-items: center; gap: .5rem; }
+.password-field-control input { flex: 1; min-width: 0; }
+.site-content .password-toggle {
+  flex-shrink: 0;
+  min-width: 64px;
+  padding: .5rem .75rem;
+  border: 1px solid var(--line);
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: .8125rem;
+}
+.site-content .password-toggle:hover { background: #dce8d2; }
