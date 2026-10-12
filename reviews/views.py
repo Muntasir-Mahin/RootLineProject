@@ -1,4 +1,5 @@
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.shortcuts import render, redirect, get_object_or_404
 
 from products.models import Product
@@ -57,14 +58,17 @@ def add_review_view(request, product_id, order_id):
 
         if form.is_valid():
 
-            review = form.save(commit=False)
-
-            review.buyer = request.user
-            review.product = product
-            review.order = order
-
-            review.save()
-
+            with transaction.atomic():
+                locked_order = Order.objects.select_for_update().get(pk=order.pk)
+                if (
+                    locked_order.status != 'delivered'
+                    or not locked_order.items.filter(product=product).exists()
+                ):
+                    return redirect('my_orders')
+                Review.objects.get_or_create(
+                    buyer=request.user, product=product, order=locked_order,
+                    defaults=form.cleaned_data,
+                )
 
             return redirect(
                 'marketplace_product_detail',

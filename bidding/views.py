@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect, render
@@ -7,6 +8,7 @@ from django.utils import timezone
 
 from orders.forms import CheckoutForm
 from orders.models import Order, OrderItem
+from orders.services import deduct_stock
 from payments.models import Payment
 from products.models import Product
 
@@ -14,16 +16,21 @@ from .forms import AuctionForm, BidForm
 from .models import Auction, Bid
 from .services import finalize_auction
 @login_required
+@transaction.atomic
 def create_auction_view(request, product_id):
 
     if not request.user.seller_approved:
         return redirect('profile')
 
     product = get_object_or_404(
-        Product,
+        Product.objects.select_for_update(),
         id=product_id,
         seller=request.user
     )
+
+    if not product.is_available or product.stock_quantity < Decimal('1'):
+        messages.error(request, 'An auction needs at least one available unit in stock.')
+        return redirect('my_products')
 
     # Fixed-price only product-er auction create kora jabe na
     if product.selling_type not in ['bidding', 'both']:
@@ -75,6 +82,8 @@ def auction_list_view(request):
         product__selling_type__in=['bidding', 'both'],
         start_time__lte=now,
         end_time__gt=now,
+        status__in=['active', 'upcoming'],
+        product__stock_quantity__gte=1,
     ).select_related(
         'product',
         'product__seller'
@@ -101,18 +110,12 @@ def auction_detail_view(request, auction_id):
             'winner',
             'order',
         ),
-        id=auction_id
+        id=auction_id,
+        product__verification_status='verified',
+        product__is_available=True,
+        product__selling_type__in=['bidding', 'both'],
+        product__stock_quantity__gte=1,
     )
-
-    now = timezone.now()
-
-    # Auction start hole active
-    if (
-        auction.status == 'upcoming'
-        and auction.start_time <= now < auction.end_time
-    ):
-        auction.status = 'active'
-        auction.save(update_fields=['status'])
 
     # Auction end hole winner select
     auction = finalize_auction(auction)
@@ -153,13 +156,13 @@ def place_bid_view(request, auction_id):
 
     with transaction.atomic():
 
-        auction = get_object_or_404(
-            Auction.objects.select_for_update().select_related(
-                'product',
-                'product__seller'
-            ),
-            id=auction_id
+        auction_ref = get_object_or_404(Auction, pk=auction_id)
+        product = get_object_or_404(
+            Product.objects.select_for_update(), pk=auction_ref.product_id,
+            verification_status='verified', is_available=True,
+            selling_type__in=['bidding', 'both'], stock_quantity__gte=1,
         )
+        auction = get_object_or_404(Auction.objects.select_for_update(), pk=auction_id)
 
         now = timezone.now()
 
@@ -179,7 +182,7 @@ def place_bid_view(request, auction_id):
             )
 
         # Seller nijer product-e bid korte parbe na
-        if auction.product.seller == request.user:
+        if product.seller_id == request.user.pk:
             return redirect(
                 'auction_detail',
                 auction_id=auction.id
@@ -207,16 +210,18 @@ def place_bid_view(request, auction_id):
     )
 
 @login_required
+@transaction.atomic
 def edit_auction_view(request, auction_id):
 
     if not request.user.seller_approved:
         return redirect('profile')
 
-    auction = get_object_or_404(
-        Auction,
-        id=auction_id,
-        product__seller=request.user
-    )
+    auction_ref = get_object_or_404(Auction, pk=auction_id, product__seller=request.user)
+    product = get_object_or_404(Product.objects.select_for_update(), pk=auction_ref.product_id)
+    auction = get_object_or_404(Auction.objects.select_for_update(), pk=auction_id)
+    if not product.is_available or product.stock_quantity < Decimal('1'):
+        messages.error(request, 'An auction needs at least one available unit in stock.')
+        return redirect('my_products')
 
     # Auction start hoye gele edit kora jabe na
     if timezone.now() >= auction.start_time:
@@ -259,17 +264,12 @@ def edit_auction_view(request, auction_id):
     )
 
 @login_required
+@transaction.atomic
 def auction_winner_checkout_view(request, auction_id):
 
-    auction = get_object_or_404(
-        Auction.objects.select_related(
-            'product',
-            'product__seller',
-            'winner',
-            'order',
-        ),
-        id=auction_id
-    )
+    auction_ref = get_object_or_404(Auction, pk=auction_id)
+    product = get_object_or_404(Product.objects.select_for_update(), pk=auction_ref.product_id)
+    auction = get_object_or_404(Auction.objects.select_for_update(), pk=auction_id)
 
     auction = finalize_auction(auction)
 
@@ -301,7 +301,14 @@ def auction_winner_checkout_view(request, auction_id):
     if auction.order:
         return redirect('my_orders')
 
-    product = auction.product
+    if (
+        product.verification_status != 'verified'
+        or not product.is_available
+        or product.selling_type not in ['bidding', 'both']
+        or product.stock_quantity < Decimal('1')
+    ):
+        messages.error(request, 'This auction product is no longer available.')
+        return redirect('my_orders')
 
     initial_data = {
         'recipient_name':
@@ -342,6 +349,10 @@ def auction_winner_checkout_view(request, auction_id):
                 # Stock check
                 if (
                     product.seller_id == request.user.id
+                    or product.verification_status != 'verified'
+                    or product.selling_type not in ['bidding', 'both']
+                    or auction.winner_id != request.user.pk
+                    or auction.status != 'ended'
                     or not product.is_available
                     or product.stock_quantity < quantity
                 ):
@@ -389,19 +400,7 @@ def auction_winner_checkout_view(request, auction_id):
                     escrow_status='not_held'
                 )
 
-                # Reduce stock
-                product.stock_quantity -= quantity
-
-                if product.stock_quantity <= 0:
-                    product.stock_quantity = 0
-                    product.is_available = False
-
-                product.save(
-                    update_fields=[
-                        'stock_quantity',
-                        'is_available'
-                    ]
-                )
+                deduct_stock(product, quantity)
 
                 # Auction-er sathe order link
                 auction.order = order

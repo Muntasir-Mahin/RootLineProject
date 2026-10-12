@@ -4,6 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect, get_object_or_404
 from django.utils import timezone
 from django.db.models import Avg
+from django.db import transaction
 
 from .forms import ProductForm
 from .models import Product
@@ -11,6 +12,7 @@ from .models import Product
 from reviews.models import Review
 from bidding.services import finalize_auction
 from wishlist.models import Wishlist
+from orders.services import fixed_purchase_blocked
 
 
 # --------------------------------------------------
@@ -85,6 +87,7 @@ def my_products_view(request):
 # --------------------------------------------------
 
 @login_required
+@transaction.atomic
 def edit_product_view(request, product_id):
 
     if not request.user.seller_approved:
@@ -92,7 +95,7 @@ def edit_product_view(request, product_id):
 
 
     product = get_object_or_404(
-        Product,
+        Product.objects.select_for_update(),
         id=product_id,
         seller=request.user
     )
@@ -147,7 +150,7 @@ def delete_product_view(request, product_id):
     if request.method == "POST":
 
         product.is_available = False
-        product.save()
+        product.save(update_fields=['is_available'])
 
         return redirect('my_products')
 
@@ -387,20 +390,6 @@ def marketplace_product_detail_view(request, product_id):
         now = timezone.now()
 
 
-        if (
-            auction.start_time <= now < auction.end_time
-            and auction.status == 'upcoming'
-        ):
-
-            auction.status = 'active'
-
-            auction.save(
-                update_fields=[
-                    'status'
-                ]
-            )
-
-
         auction = finalize_auction(auction)
 
         auction_is_active = (
@@ -448,6 +437,7 @@ def marketplace_product_detail_view(request, product_id):
             'average_rating': average_rating,
             'seller_rating': seller_rating,
             'seller_review_count': seller_review_count,
+            'fixed_purchase_blocked': fixed_purchase_blocked(product.pk),
             'is_favourite': request.user.is_authenticated and Wishlist.objects.filter(
                 user=request.user, product=product
             ).exists(),

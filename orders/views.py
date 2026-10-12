@@ -4,11 +4,13 @@ from django.contrib import messages
 from django import forms
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.db.models import F
 from django.shortcuts import get_object_or_404, redirect, render
 
 from products.models import Product
 from .forms import CheckoutForm
-from .models import Cart, CartItem, Order, OrderItem
+from .models import Cart, CartItem, Order
+from .services import CheckoutUnavailable, checkout_cart, fixed_purchase_blocked
 from django.utils import timezone
 from reviews.models import Review
 
@@ -33,6 +35,10 @@ def add_to_cart_view(request, product_id):
     if product.seller_id == request.user.id:
         messages.error(request, 'You cannot buy your own product.')
         return redirect('marketplace_product_detail', product_id=product.id)
+
+    if fixed_purchase_blocked(product.pk):
+        messages.error(request, 'Fixed-price purchases are paused until this auction is settled.')
+        return redirect('marketplace_product_detail', product_id=product.pk)
 
     if request.method == 'POST':
         try:
@@ -152,102 +158,12 @@ def checkout_view(request):
 
         if form.is_valid():
 
-            # Check product availability and stock again
-            for item in cart_items:
-                product = item.product
-
-                if (
-                    product.seller_id == request.user.id
-                    or item.quantity <= 0
-                    or product.verification_status != 'verified'
-                    or not product.is_available
-                    or product.selling_type not in ['fixed', 'both']
-                    or product.price is None
-                    or item.quantity > product.stock_quantity
-                ):
-                    return redirect('cart')
-
-            with transaction.atomic():
-
-                seller_items = {}
-
-                # Group cart items by seller
-                for item in cart_items:
-                    seller_id = item.product.seller_id
-
-                    if seller_id not in seller_items:
-                        seller_items[seller_id] = []
-
-                    seller_items[seller_id].append(item)
-
-                created_orders = []
-
-                # Create a separate order for each seller
-                for seller_id, items in seller_items.items():
-
-                    seller = items[0].product.seller
-
-                    total_amount = Decimal('0.00')
-
-                    for item in items:
-                        total_amount += (
-                            item.product.price * item.quantity
-                        )
-
-                    order = Order.objects.create(
-                        buyer=request.user,
-                        seller=seller,
-                        recipient_name=form.cleaned_data['recipient_name'],
-                        email=form.cleaned_data['email'],
-                        phone_number=form.cleaned_data['phone_number'],
-                        delivery_address=form.cleaned_data['delivery_address'],
-                        payment_method=form.cleaned_data['payment_method'],
-                        total_amount=total_amount,
-                        status='pending'
-                    )
-
-                    Payment.objects.create(
-                        order=order,
-                        amount=total_amount,
-                        payment_status='pending',
-                        escrow_status='not_held'
-                    )
-
-                    created_orders.append(order)
-
-                    for item in items:
-                        product = item.product
-
-                        OrderItem.objects.create(
-                            order=order,
-                            product=product,
-                            product_name=product.name,
-                            price=product.price,
-                            quantity=item.quantity,
-                            unit=product.unit
-                        )
-
-                        # Reduce stock
-                        product.stock_quantity -= item.quantity
-
-                        if product.stock_quantity <= 0:
-                            product.stock_quantity = 0
-                            product.is_available = False
-
-                        product.save(
-                            update_fields=[
-                                'stock_quantity',
-                                'is_available'
-                            ]
-                        )
-
-                # Clear cart after order creation
-                cart.items.all().delete()
-
-                # Save newly created order IDs temporarily
-                request.session['latest_order_ids'] = [
-                    order.id for order in created_orders
-                ]
+            try:
+                created_orders = checkout_cart(cart.pk, request.user, form.cleaned_data)
+            except CheckoutUnavailable as error:
+                messages.error(request, str(error))
+                return redirect('cart')
+            request.session['latest_order_ids'] = [order.pk for order in created_orders]
 
             return redirect('order_success')
 
@@ -330,13 +246,14 @@ def seller_orders_view(request):
         {'orders': orders}
     )
 @login_required
+@transaction.atomic
 def update_order_status_view(request, order_id):
 
     if not request.user.seller_approved:
         return redirect('profile')
 
     order = get_object_or_404(
-        Order,
+        Order.objects.select_for_update(),
         id=order_id,
         seller=request.user
     )
@@ -358,14 +275,9 @@ def update_order_status_view(request, order_id):
                     for item in order.items.select_related('product'):
                         product = item.product
 
-                        product.stock_quantity += item.quantity
-                        product.is_available = True
-
-                        product.save(
-                            update_fields=[
-                                'stock_quantity',
-                                'is_available'
-                            ]
+                        Product.objects.filter(pk=product.pk).update(
+                            stock_quantity=F('stock_quantity') + item.quantity,
+                            is_available=True,
                         )
 
                     # Refund payment if buyer already paid

@@ -42,5 +42,13 @@ class Review(models.Model):
     )
 
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['buyer', 'product', 'order'],
+                name='unique_review_per_buyer_product_order',
+            ),
+        ]
+
     def __str__(self):
         return f"{self.product.name} - {self.rating} Star"

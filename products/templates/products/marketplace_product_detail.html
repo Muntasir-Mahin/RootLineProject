@@ -57,6 +57,8 @@ Selling Type:
 <div class="purchase-panel"><!-- BUY SECTION -->
 {% if product.seller_id == user.id %}
 <p>You cannot buy your own product.</p>
+{% elif fixed_purchase_blocked %}
+<p>Fixed-price purchases are paused until this auction is settled.</p>
 {% elif product.selling_type == 'fixed' or product.selling_type == 'both' %}
 <hr class="my-10">
 <h2 class="text-2xl font-bold mb-4">
