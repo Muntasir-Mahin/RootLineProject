@@ -396,3 +396,14 @@
 .logout-panel h1 { font-size: 1.75rem; font-weight: 650; margin-bottom: .75rem; }
 .logout-actions { display: flex; flex-wrap: wrap; gap: .75rem; justify-content: flex-end; }
 .logout-actions button:disabled { opacity: .65; cursor: wait; }
+
+/* Numeric values are entered manually; hide the browser's increment controls. */
+.rootline-app input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.rootline-app input[type="number"]::-webkit-inner-spin-button,
+.rootline-app input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
