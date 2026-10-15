@@ -1,5 +1,6 @@
 """Local recording transcription with ffmpeg and whisper.cpp, without cloud calls."""
 import shutil
+import re
 import subprocess
 import tempfile
 import wave
@@ -9,6 +10,7 @@ from django.conf import settings
 
 MAX_AUDIO_BYTES = 8 * 1024 * 1024
 MAX_AUDIO_SECONDS = 60
+BANGLA_CONTEXT = 'বাংলাদেশের বাংলা ভাষায় কথোপকথন।'
 
 
 class VoiceError(Exception):
@@ -61,6 +63,19 @@ def audio_format(raw):
     raise VoiceError('Choose a WebM, M4A/MP4, WAV or Ogg recording.', status=400)
 
 
+def validate_transcript(result, language):
+    if not result or len(result) > 2000:
+        raise VoiceError('No usable speech was found. Try a shorter recording in a quiet place.', status=422)
+    if language == 'bn':
+        bangla = sum('\u0980' <= char <= '\u09ff' and char.isalpha() for char in result)
+        devanagari = sum('\u0900' <= char <= '\u097f' and char.isalpha() for char in result)
+        # Script check only: it cannot assess pronunciation, meaning or accuracy.
+        # Keep legitimate Bangla/English mixed speech; never translate or
+        # transliterate a wrongly recognised Hindi sentence into a guessed question.
+        if devanagari > bangla:
+            raise VoiceError('বাংলা ঠিকভাবে শনাক্ত হয়নি। আবার পরিষ্কারভাবে পুরো বাক্য বলুন, অথবা প্রশ্নটি লিখুন।', status=422)
+
+
 def transcribe(upload, language):
     if language not in ('bn', 'en', 'auto'):
         raise VoiceError('Choose Bangla, English or Auto for the recording.', status=400)
@@ -72,6 +87,8 @@ def transcribe(upload, language):
     container = audio_format(raw)
     try:
         cli, ffmpeg, model = configuration()
+        if language != 'en' and re.search(r'\.en(?:[.-]|$)', model.name, re.IGNORECASE):
+            raise VoiceError('Bangla needs the multilingual Whisper model, such as ggml-small.bin, not small.en.')
         with tempfile.TemporaryDirectory(prefix='rootline-voice-') as directory:
             folder = Path(directory)
             source, wav, output = folder / 'recording', folder / 'audio.wav', folder / 'transcript'
@@ -90,14 +107,16 @@ def transcribe(upload, language):
                 duration = audio.getnframes() / audio.getframerate()
             if duration < 0.3 or duration > MAX_AUDIO_SECONDS:
                 raise VoiceError('Use a recording between 1 and 60 seconds.', status=400)
-            subprocess.run([
+            command = [
                 cli, '-m', str(model), '-f', str(wav), '-l', language,
                 '-t', '4', '-otxt', '-of', str(output), '-nt', '-np',
-            ], check=True, timeout=120, stdin=subprocess.DEVNULL,
+            ]
+            if language == 'bn':
+                command.extend(['--prompt', BANGLA_CONTEXT])
+            subprocess.run(command, check=True, timeout=120, stdin=subprocess.DEVNULL,
                 stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
             result = output.with_suffix('.txt').read_text(encoding='utf-8').strip()
-            if not result or len(result) > 2000:
-                raise VoiceError('No usable speech was found. Try a shorter recording in a quiet place.', status=422)
+            validate_transcript(result, language)
             return result
     except VoiceError:
         raise

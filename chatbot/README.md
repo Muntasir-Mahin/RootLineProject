@@ -118,6 +118,18 @@ These optional checks print the actual model output and do not create chat histo
 
 ## Privacy, context and errors
 
+### Bangla recording appears in Hindi / Devanagari
+
+If **Record question** produces Devanagari text in the question box while **Voice language: বাংলা** is selected, speech recognition has used the wrong script. The selector controls transcription, not the language of a previous AI answer. Short/unclear recordings, regional accents or the small model's limitations can contribute; the screenshot alone cannot establish the exact cause.
+
+Bangla requests already pass `-l bn` to whisper.cpp. This update also supplies a short Bangla initial context, rejects predominantly Devanagari results with a clear error, and rejects known English-only `.en` model filenames for Bangla/Auto. English and Auto choices keep their selected behavior. The script check preserves Bangla/English mixed text and cannot verify that a Bangla transcript is accurate. It does not translate a wrongly recognised sentence into a guessed question.
+
+To apply this small fix to an existing voice/image installation, replace `chatbot/voice.py` from the updated branch ZIP and restart Django. `chatbot/test_media.py` and this README are also updated. No migration, npm install or model re-download is needed for the code fix. Clear the incorrect text from the question box, select **বাংলা**, and try a complete sentence in a quiet place. Review it before selecting Send.
+
+If it still mishears speech, test a clear short recording with `python manage.py check_voice --audio "/absolute/path/to/question.wav" --language bn`. Verify that `WHISPER_MODEL_PATH` points to the multilingual model. A larger local Whisper model can be tried separately if accuracy remains insufficient, but needs a separate download and testing on the laptop.
+
+### Retained data and request handling
+
 - Login is required. Each user's latest 30 messages are private to that account. Chats do not appear in Django staff admin or the staff Activity log. The database operator and backups can still access retained text.
 - Photos are sent only to local Ollama for the current question. They are **not retained in chat storage or public media**. A small attachment flag is kept so history can say a photo was used. If discussing it again later, attach it again. Previous image turns explicitly tell the model that their image is no longer available.
 - Recordings are processed through temporary files by local ffmpeg and whisper.cpp, then deleted after success or error. The recognized text is initially an editable draft. It becomes stored conversation text only when the user selects Send successfully. Existing reverse proxies/hosting infrastructure may separately log or buffer uploads according to their configuration.

@@ -176,11 +176,18 @@ class VoicePipelineTests(SimpleTestCase):
             self.assertIn('-protocol_whitelist', args)
             self.assertEqual(args[args.index('-f') + 1], 'wav')
         else:
-            self.assertEqual(args[args.index('-l') + 1], 'bn')
+            self.assertEqual(args[args.index('-l') + 1], self.language)
+            if self.language == 'bn':
+                self.assertEqual(args[args.index('--prompt') + 1], voice.BANGLA_CONTEXT)
+            else:
+                self.assertNotIn('--prompt', args)
+            self.assertNotIn('--translate', args)
+            self.assertNotIn('-tr', args)
             Path(args[args.index('-of') + 1]).with_suffix('.txt').write_text(self.output, encoding='utf-8')
 
     def setUp(self):
         self.duration = 1
+        self.language = 'bn'
         self.output = 'Local protocol fixture transcript.'
         self.work_folder = None
 
@@ -198,6 +205,37 @@ class VoicePipelineTests(SimpleTestCase):
             with patch('chatbot.voice.subprocess.run', side_effect=self.fake_run), self.assertRaises(voice.VoiceError):
                 voice.transcribe(recording(), 'bn')
             self.assertFalse(self.work_folder.exists())
+
+    @patch('chatbot.voice.configuration', return_value=('fixture-whisper', 'fixture-ffmpeg', Path('fixture-model')))
+    def test_bangla_request_rejects_devanagari_result_and_cleans_audio(self, configuration):
+        self.output = 'आमा कि कल बिल्ल'
+        with patch('chatbot.voice.subprocess.run', side_effect=self.fake_run), self.assertRaises(voice.VoiceError) as error:
+            voice.transcribe(recording(), 'bn')
+        self.assertEqual(error.exception.status, 422)
+        self.assertIn('বাংলা ঠিকভাবে শনাক্ত হয়নি', str(error.exception))
+        self.assertFalse(self.work_folder.exists())
+
+    def test_bangla_and_bangla_english_mixed_transcripts_are_kept_exactly(self):
+        for text in ['আমার টমেটো গাছের পাতা হলুদ কেন?', 'আমার tomato গাছের পাতা হলুদ কেন?', 'Tomato']:
+            self.assertIsNone(voice.validate_transcript(text, 'bn'))
+
+    def test_auto_and_english_choices_do_not_apply_a_bangla_script_check(self):
+        for language in ['auto', 'en']:
+            self.assertIsNone(voice.validate_transcript('यह एक परीक्षण है', language))
+
+    @patch('chatbot.voice.configuration', return_value=('fixture-whisper', 'fixture-ffmpeg', Path('ggml-small.en.bin')))
+    @patch('chatbot.voice.subprocess.run')
+    def test_english_only_model_cannot_be_used_for_bangla(self, run, configuration):
+        with self.assertRaisesMessage(voice.VoiceError, 'multilingual Whisper model'):
+            voice.transcribe(recording(), 'bn')
+        run.assert_not_called()
+
+    @patch('chatbot.voice.configuration', return_value=('fixture-whisper', 'fixture-ffmpeg', Path('fixture-model')))
+    def test_english_and_auto_language_flags_are_preserved_without_bangla_prompt(self, configuration):
+        for language in ['en', 'auto']:
+            self.language = language
+            with patch('chatbot.voice.subprocess.run', side_effect=self.fake_run):
+                self.assertEqual(voice.transcribe(recording(), language), self.output)
 
     @patch('chatbot.voice.subprocess.run')
     def test_playlists_and_oversized_audio_never_launch_a_process(self, run):
