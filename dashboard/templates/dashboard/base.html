@@ -8,7 +8,8 @@
 {% if can_finance %}<a {% if section == 'payments' %}aria-current="page"{% endif %} href="{% url 'dashboard:payments' %}">Payments <span class="count">{{ queue_sizes.payments }}</span></a>{% endif %}
 {% if can_support %}<a {% if section == 'disputes' %}aria-current="page"{% endif %} href="{% url 'dashboard:disputes' %}">Disputes <span class="count">{{ queue_sizes.disputes }}</span></a>{% endif %}
 {% if can_catalogue %}<a {% if section == 'products' %}aria-current="page"{% endif %} href="{% url 'dashboard:products' %}">Products <span class="count">{{ queue_sizes.products }}</span></a>
-<a {% if section == 'sellers' %}aria-current="page"{% endif %} href="{% url 'dashboard:sellers' %}">Sellers <span class="count">{{ queue_sizes.sellers }}</span></a>{% endif %}
+<a {% if section == 'sellers' %}aria-current="page"{% endif %} href="{% url 'dashboard:sellers' %}">Sellers <span class="count">{{ queue_sizes.sellers }}</span></a>
+<a {% if section == 'agro_videos' %}aria-current="page"{% endif %} href="{% url 'dashboard:agro_videos' %}">Agro Updates <span class="count">{{ agro_draft_count }}</span></a>{% endif %}
 <a {% if section == 'orders' %}aria-current="page"{% endif %} href="{% url 'dashboard:orders' %}">Orders</a>
 <a {% if section == 'activity' %}aria-current="page"{% endif %} href="{% url 'dashboard:activity' %}">Activity log</a>
 </nav><div class="sidebar-footer"><strong>{{ request.user.get_username }}</strong><a href="{% url 'profile' %}">My account</a><a href="{% url 'logout' %}">Sign out</a></div></aside>

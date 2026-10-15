@@ -1,0 +1,16 @@
+<article class="agro-card surface">
+  <a class="agro-thumbnail" href="{{ video.get_absolute_url }}" aria-label="Watch {{ video.title }}">
+    <span class="agro-thumbnail-fallback">{% include 'components/icon.html' with name='leaf' %}</span>
+    <img src="{{ video.thumbnail_url }}" alt="{{ video.title }}" loading="lazy" decoding="async" referrerpolicy="no-referrer" onerror="this.hidden = true;">
+    <span class="agro-play" aria-hidden="true"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span>
+    <span class="agro-source-label">YouTube</span>
+    {% if video.featured %}<span class="agro-featured">Editor's pick</span>{% endif %}
+  </a>
+  <div class="agro-card-body">
+    <div class="agro-card-meta"><span class="agro-topic">{{ video.get_category_display }}</span><span>{{ video.get_language_display }}</span></div>
+    <h3><a href="{{ video.get_absolute_url }}">{{ video.title }}</a></h3>
+    <p class="agro-card-summary">{{ video.summary|default:'Watch this farming update selected by the RootLine team.'|truncatechars:145 }}</p>
+    <p class="agro-video-date">{% if video.source_published_on %}Video date: <time datetime="{{ video.source_published_on|date:'Y-m-d' }}">{{ video.source_published_on|date:'d M Y' }}</time>{% else %}Added to RootLine: <time datetime="{{ video.published_at|date:'c' }}">{{ video.published_at|date:'d M Y' }}</time>{% endif %}</p>
+    <div class="agro-card-footer"><span>{{ video.channel_name|default:'YouTube video' }}</span><a href="{{ video.get_absolute_url }}">Watch video <span aria-hidden="true">→</span></a></div>
+  </div>
+</article>

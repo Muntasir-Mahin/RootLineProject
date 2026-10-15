@@ -1,0 +1,22 @@
+{% extends 'base.html' %}{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'agro_updates/agro.css' %}">{% endblock %}
+{% block content %}
+<div class="agro-page">
+  <header class="agro-hero">
+    <div><p class="section-eyebrow">KNOWLEDGE FOR EVERY GROWER</p><h1>Better farming<br>starts with learning.</h1><p class="agro-intro">Explore farming news, practical guides and ideas for your next season. Selected by the RootLine team for farmers and producers.</p><div class="agro-hero-bottom"><span class="agro-curated-label"><span aria-hidden="true">✓</span> Selected by our team</span><span>{{ total_videos }} video{{ total_videos|pluralize }} to explore</span></div></div>
+    <div class="agro-hero-art" aria-hidden="true"><span class="agro-art-ring"></span><span class="agro-art-leaf">{% include 'components/icon.html' with name='leaf' %}</span><span class="agro-art-play"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg></span><p>GROW YOUR KNOWLEDGE</p></div>
+  </header>
+  <div class="agro-section-heading"><div><p class="section-eyebrow">AGRO UPDATES</p><h2>Fresh ideas for your farm</h2></div>{% if can_manage %}<a class="outline-action" href="{% url 'dashboard:agro_videos' %}">Manage videos <span aria-hidden="true">→</span></a>{% endif %}</div>
+  <form class="agro-filters surface" method="get">
+    <div class="agro-search"><label for="agro-search">What would you like to learn?</label><input id="agro-search" name="q" value="{{ search }}" placeholder="Search a crop, topic or channel…" maxlength="150"></div>
+    <div><label for="agro-language">Language</label><select id="agro-language" name="language"><option value="">All languages</option>{% for value, label in languages %}<option value="{{ value }}" {% if selected_language == value %}selected{% endif %}>{{ label }}</option>{% endfor %}</select></div>
+    {% if selected_category %}<input type="hidden" name="category" value="{{ selected_category }}">{% endif %}
+    <button class="primary-action" type="submit">Find videos <span aria-hidden="true">→</span></button>
+  </form>
+  <nav class="agro-topics" aria-label="Video topics"><a href="{% querystring category=None page=None %}" {% if not selected_category %}aria-current="page"{% endif %}>All topics <span>{{ total_videos }}</span></a>{% for category in categories %}<a href="{% querystring category=category.value page=None %}" {% if selected_category == category.value %}aria-current="page"{% endif %}>{{ category.label }} <span>{{ category.count }}</span></a>{% endfor %}</nav>
+  {% if search or selected_language or selected_category %}<p class="agro-results">{{ page_obj.paginator.count }} video{{ page_obj.paginator.count|pluralize }} found <a href="{% url 'agro_updates:index' %}">Clear filters</a></p>{% endif %}
+  {% if page_obj %}<div class="agro-grid">{% for video in page_obj %}{% include 'agro_updates/card.html' %}{% endfor %}</div>
+  <div class="agro-pagination"><p>Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</p><nav aria-label="Video pages">{% if page_obj.has_previous %}<a class="outline-action" href="{% querystring page=page_obj.previous_page_number %}">← Previous</a>{% endif %}{% if page_obj.has_next %}<a class="outline-action" href="{% querystring page=page_obj.next_page_number %}">Next →</a>{% endif %}</nav></div>
+  {% else %}<section class="agro-empty surface"><span class="empty-icon">{% include 'components/icon.html' with name='leaf' %}</span><h3>{% if search or selected_language or selected_category %}No videos match your search{% else %}Fresh knowledge is on its way{% endif %}</h3><p>{% if search or selected_language or selected_category %}Try another topic or clear the filters to explore more videos.{% else %}Our team is selecting useful farming videos. Check back for new updates.{% endif %}</p>{% if can_manage %}<a class="primary-action" href="{% url 'dashboard:agro_video_create' %}">Add a video →</a>{% endif %}</section>{% endif %}
+</div>
+{% endblock %}

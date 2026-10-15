@@ -10,6 +10,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 from django.views.decorators.http import require_GET, require_POST
 
+from agro_updates.models import Video
 from bidding.models import Auction
 from disputes.models import Dispute
 from disputes.services import FINAL_DISPUTE_STATUSES, decide_dispute
@@ -51,7 +52,7 @@ def page(request, queryset, size=25, param='page'):
 
 def panel(request, template, title, section, **context):
     context.update(
-        title=title, section=section,
+        title=title, section=section, agro_draft_count=Video.objects.filter(is_published=False).count(),
         can_finance=has_role(request.user, FINANCE), can_support=has_role(request.user, SUPPORT),
         can_catalogue=has_role(request.user, CATALOGUE),
         queue_sizes={key: value.count() for key, value in queues().items()},

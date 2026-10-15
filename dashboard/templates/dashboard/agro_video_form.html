@@ -1,0 +1,5 @@
+{% extends 'dashboard/base.html' %}{% block content %}
+<p><a href="{% url 'dashboard:agro_videos' %}">← Manage Agro Updates</a></p>
+<section class="panel decision"><h2>{% if video %}Video details{% else %}Add a farming video{% endif %}</h2><p class="muted">Paste a YouTube video link and add a clear title. Keep it as a draft until you are ready to publish. The original creator's thumbnail and player appear automatically.</p>
+<form method="post" action="{% if video %}{% url 'dashboard:agro_video_edit' video.pk %}{% else %}{% url 'dashboard:agro_video_create' %}{% endif %}">{% csrf_token %}{{ form.non_field_errors }}{% for field in form %}<p class="agro-editor-field">{{ field.label_tag }}{{ field }}{% if field.help_text %}<small class="muted" style="display:block">{{ field.help_text }}</small>{% endif %}{{ field.errors }}</p>{% endfor %}<div class="actions"><button type="submit">Save video</button><a class="button secondary" href="{% url 'dashboard:agro_videos' %}">Cancel</a></div></form></section>
+{% endblock %}
