@@ -1,18 +1,18 @@
 from decimal import Decimal
-from payments.models import Payment
-from django.contrib import messages
-from django import forms
-from django.contrib.auth.decorators import login_required
-from django.db import transaction
-from django.db.models import F
-from django.shortcuts import get_object_or_404, redirect, render
 
+from django import forms
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import get_object_or_404, redirect, render
+from django.views.decorators.http import require_POST
+
+from dashboard.audit import DecisionError
+from payments.services import confirm_delivery
 from products.models import Product
+from reviews.models import Review
 from .forms import CheckoutForm
 from .models import Cart, CartItem, Order
-from .services import CheckoutUnavailable, checkout_cart, fixed_purchase_blocked
-from django.utils import timezone
-from reviews.models import Review
+from .services import CheckoutUnavailable, checkout_cart, fixed_purchase_blocked, update_seller_order
 
 
 def cart_quantity(value):
@@ -245,136 +245,29 @@ def seller_orders_view(request):
         'orders/seller_orders.html',
         {'orders': orders}
     )
-@login_required
-@transaction.atomic
-def update_order_status_view(request, order_id):
 
+
+@login_required
+@require_POST
+def update_order_status_view(request, order_id):
     if not request.user.seller_approved:
         return redirect('profile')
-
-    order = get_object_or_404(
-        Order.objects.select_for_update(),
-        id=order_id,
-        seller=request.user
-    )
-
-    if request.method == 'POST':
-        action = request.POST.get('action')
-
-        if order.status == 'pending':
-
-            if action == 'confirm':
-                order.status = 'confirmed'
-                order.save(update_fields=['status'])
-
-            elif action == 'cancel':
-
-                with transaction.atomic():
-
-                    # Restore product stock
-                    for item in order.items.select_related('product'):
-                        product = item.product
-
-                        Product.objects.filter(pk=product.pk).update(
-                            stock_quantity=F('stock_quantity') + item.quantity,
-                            is_available=True,
-                        )
-
-                    # Refund payment if buyer already paid
-                    payment = Payment.objects.filter(
-                        order=order
-                    ).first()
-
-                    if (
-                        payment
-                        and payment.payment_status == 'paid'
-                        and payment.escrow_status == 'held'
-                    ):
-                        payment.payment_status = 'refunded'
-                        payment.escrow_status = 'refunded'
-                        payment.commission_amount = Decimal('0.00')
-                        payment.seller_amount = Decimal('0.00')
-
-                        payment.save(
-                            update_fields=[
-                                'payment_status',
-                                'escrow_status',
-                                'commission_amount',
-                                'seller_amount',
-                            ]
-                        )
-
-                    order.status = 'cancelled'
-                    order.save(update_fields=['status'])
-
-        elif order.status == 'confirmed':
-
-            if action == 'ship':
-
-                payment = Payment.objects.filter(
-                    order=order
-                ).first()
-
-                if (
-                        payment
-                        and payment.payment_status == 'paid'
-                        and payment.escrow_status == 'held'
-                ):
-                    order.status = 'shipped'
-                    order.save(update_fields=['status'])
-
-        return redirect('seller_orders')
-
+    get_object_or_404(Order, pk=order_id, seller=request.user)
+    try:
+        update_seller_order(order_id, actor=request.user, action=request.POST.get('action'))
+    except DecisionError as error:
+        messages.error(request, str(error))
     return redirect('seller_orders')
 
+
 @login_required
+@require_POST
 def confirm_delivery_view(request, order_id):
-
-    order = get_object_or_404(
-        Order,
-        id=order_id,
-        buyer=request.user
-    )
-
-    if request.method == 'POST':
-
-        if order.status == 'shipped':
-
-            payment = order.payment
-
-            # Delivery only completes if payment is already held in escrow
-            if (
-                payment.payment_status == 'paid'
-                and payment.escrow_status == 'held'
-            ):
-
-                with transaction.atomic():
-
-                    commission = (
-                        payment.amount * Decimal('0.05')
-                    ).quantize(Decimal('0.01'))
-
-                    seller_amount = (
-                        payment.amount - commission
-                    )
-
-                    payment.commission_amount = commission
-                    payment.seller_amount = seller_amount
-                    payment.escrow_status = 'released'
-                    payment.released_at = timezone.now()
-
-                    payment.save(
-                        update_fields=[
-                            'commission_amount',
-                            'seller_amount',
-                            'escrow_status',
-                            'released_at',
-                        ]
-                    )
-
-                    order.status = 'delivered'
-                    order.save(update_fields=['status'])
-
-        return redirect('my_orders')
-
+    get_object_or_404(Order, pk=order_id, buyer=request.user)
+    try:
+        confirm_delivery(order_id, actor=request.user)
+    except DecisionError as error:
+        messages.error(request, str(error))
+    else:
+        messages.success(request, 'Delivery confirmed and escrow released.')
     return redirect('my_orders')

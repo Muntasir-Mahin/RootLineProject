@@ -32,6 +32,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'dashboard',
     'accounts',
     'products',
     'orders',
@@ -40,7 +41,7 @@ INSTALLED_APPS = [
     'disputes',
     'reviews',
     'wishlist',
-    'django.contrib.admin',
+    'rootline.admin_apps.OwnerAdminConfig',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',

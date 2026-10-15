@@ -1,0 +1,2 @@
+<nav class="tabs" aria-label="Status filters">{% for tab in tabs %}<a href="?tab={{ tab.value }}" {% if selected == tab.value %}aria-current="page"{% endif %}>{{ tab.label }} <span class="count">{{ tab.count }}</span></a>{% endfor %}</nav>
+{% if overdue %}<p class="notice">Showing overdue items. <a href="?tab={{ selected }}">Show all in this tab</a></p>{% endif %}

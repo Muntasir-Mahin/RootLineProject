@@ -1,0 +1,2 @@
+<div class="pagination"><span>{{ page_obj.paginator.count }} record{{ page_obj.paginator.count|pluralize }} · Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+<nav aria-label="Pagination">{% if page_obj.has_previous %}<a href="{% querystring page=page_obj.previous_page_number %}">← Previous</a>{% endif %}{% if page_obj.has_next %}<a href="{% querystring page=page_obj.next_page_number %}">Next →</a>{% endif %}</nav></div>
