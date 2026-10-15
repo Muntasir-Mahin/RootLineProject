@@ -7,4 +7,5 @@ urlpatterns = [
     path('send/', views.send, name='send'),
     path('clear/', views.clear, name='clear'),
     path('status/', views.connection_status, name='status'),
+    path('transcribe/', views.transcribe, name='transcribe'),
 ]

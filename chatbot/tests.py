@@ -19,6 +19,7 @@ from .models import Conversation, Message
 from .services import ChatError, ask, clear_history, history_for, store_turn
 
 
+@override_settings(OLLAMA_MODEL='qwen3:1.7b')
 class LocalClientTests(SimpleTestCase):
     def opener_response(self, value):
         response = MagicMock()
@@ -111,6 +112,7 @@ class LocalClientTests(SimpleTestCase):
         self.assertEqual(ollama.status()['code'], 'bad_response')
 
 
+@override_settings(OLLAMA_MODEL='qwen3:1.7b')
 class ReplyQualityGuardTests(SimpleTestCase):
     @patch('chatbot.ollama.request_json', return_value={'message': {'content': 'Check soil drainage and pH before planting.'}})
     def test_latest_english_question_overrides_previous_bangla_context(self, request_json):
@@ -352,6 +354,7 @@ class ChatViewTests(ChatFixtures):
         self.assertEqual(self.client.post(reverse('chatbot:status')).status_code, 405)
 
 
+@override_settings(OLLAMA_MODEL='qwen3:1.7b')
 class LocalHTTPIntegrationTests(SimpleTestCase):
     """Exercise HTTP/JSON behavior with a local protocol fixture, not a real AI model."""
     @contextmanager

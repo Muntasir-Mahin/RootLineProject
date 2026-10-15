@@ -166,5 +166,10 @@ LOGOUT_REDIRECT_URL = '/login/'
 # Ask RootLine: local Ollama only. No paid API or cloud fallback.
 AI_CHAT_ENABLED = os.environ.get('AI_CHAT_ENABLED', 'true').lower() in ('true', '1', 'yes')
 OLLAMA_BASE_URL = os.environ.get('OLLAMA_BASE_URL', 'http://127.0.0.1:11434')
-OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'qwen3:1.7b')
+OLLAMA_MODEL = os.environ.get('OLLAMA_MODEL', 'gemma3:4b')
 OLLAMA_TIMEOUT = 120
+
+# Local speech-to-text. Download the multilingual model separately; never commit it.
+WHISPER_MODEL_PATH = os.environ.get('WHISPER_MODEL_PATH', str(BASE_DIR / 'local_models' / 'ggml-small.bin'))
+WHISPER_CLI = os.environ.get('WHISPER_CLI', 'whisper-cli')
+FFMPEG_BINARY = os.environ.get('FFMPEG_BINARY', 'ffmpeg')

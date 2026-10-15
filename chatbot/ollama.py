@@ -1,5 +1,6 @@
 """Local-only Ollama client. No cloud fallback, API key or third-party SDK."""
 import json
+import base64
 import re
 from collections import Counter
 from urllib.error import HTTPError, URLError
@@ -8,7 +9,8 @@ from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_ope
 
 from django.conf import settings
 
-ALLOWED_MODELS = ('qwen3:1.7b', 'qwen3:0.6b', 'qwen3:4b')
+VISION_MODELS = ('gemma3:4b',)
+ALLOWED_MODELS = ('qwen3:1.7b', 'qwen3:0.6b', 'qwen3:4b', *VISION_MODELS)
 RESPONSE_LIMIT = 131072
 SYSTEM_PROMPT = (
     'You are RootLine AI, a farming learning assistant for Bangladesh. '
@@ -46,7 +48,7 @@ def configuration():
         raise LocalAIError('Local AI configuration needs attention from the site owner.', code='configuration')
     model = settings.OLLAMA_MODEL
     if model not in ALLOWED_MODELS:
-        raise LocalAIError('Choose a supported local Qwen model in the server settings.', code='configuration')
+        raise LocalAIError('Choose a supported local model in the server settings.', code='configuration')
     return base, model
 
 
@@ -84,7 +86,8 @@ def status():
             raise LocalAIError('The local model list could not be read.', code='bad_response')
         if not any(isinstance(item, dict) and item.get('name') == model for item in models):
             return {'ready': False, 'code': 'model_missing', 'message': f'Download {model} in Ollama to start chatting.'}
-        return {'ready': True, 'code': 'ready', 'message': 'Local AI is ready', 'model': model}
+        return {'ready': True, 'code': 'ready', 'message': 'Local AI is ready', 'model': model,
+                'supports_images': model in VISION_MODELS}
     except LocalAIError as error:
         return {'ready': False, 'code': error.code, 'message': str(error)}
 
@@ -104,23 +107,36 @@ def is_repetitive(content):
     return duplicates / (len(tokens) - 7) >= 0.3
 
 
-def reply(question, history):
+def reply(question, history, *, image=None):
     _, model = configuration()
+    if image and model not in VISION_MODELS:
+        raise LocalAIError('Photos need gemma3:4b. Ask the site owner to select it and restart Django.', code='vision_unsupported')
     context = [{'role': item['role'], 'content': item['content'][:1800]}
                for item in history[-6:] if item['role'] in ('user', 'assistant')]
+    for item, original in zip(context, [row for row in history[-6:] if row['role'] in ('user', 'assistant')]):
+        if original.get('has_image'):
+            item['content'] += '\n[An image was attached here but is no longer available. Ask for a new upload if needed.]'
     # Do not feed a previous generation loop back to the model. Saved history
     # remains intact until its owner chooses to clear it.
     if any(is_repetitive(item['content']) for item in context if item['role'] == 'assistant'):
         context = []
     language = 'Bangla' if re.search(r'[\u0980-\u09ff]', question) else 'English'
     prompt = SYSTEM_PROMPT + f'For this reply, write in {language}. Do not repeat the question or your sentences.'
-    result = request_json('/api/chat', timeout=settings.OLLAMA_TIMEOUT, payload={
-        'model': model, 'stream': False, 'think': False, 'keep_alive': '5m',
+    if image:
+        prompt += ' Describe visible signs first. A photo alone cannot confirm a crop disease. Ask about the crop, location and growing conditions.'
+    current = {'role': 'user', 'content': question}
+    if image:
+        current['images'] = [base64.b64encode(image).decode('ascii')]
+    payload = {
+        'model': model, 'stream': False, 'keep_alive': '5m',
         'messages': [{'role': 'system', 'content': prompt}, *context,
-                     {'role': 'user', 'content': question}],
+                     current],
         'options': {'num_predict': 350, 'num_ctx': 4096, 'temperature': 0.3,
                     'repeat_penalty': 1.15, 'repeat_last_n': 256},
-    })
+    }
+    if model.startswith('qwen3:'):
+        payload['think'] = False
+    result = request_json('/api/chat', timeout=settings.OLLAMA_TIMEOUT, payload=payload)
     message = result.get('message')
     content = message.get('content') if isinstance(message, dict) else None
     if not isinstance(content, str) or not content.strip():
