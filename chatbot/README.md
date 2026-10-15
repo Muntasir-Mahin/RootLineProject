@@ -1,6 +1,6 @@
 # Ask RootLine: local AI demo
 
-This version adds a real chat interface backed by **local Ollama**, with no paid API, API key or cloud fallback. It uses `qwen3:1.7b` by default and can also use `qwen3:0.6b`. Django and Ollama must run on the same computer for the default setup.
+This version adds a real chat interface backed by **local Ollama**, with no paid API, API key or cloud fallback. It uses `qwen3:1.7b` by default and can also use `qwen3:0.6b` or `qwen3:4b`. Django and Ollama must run on the same computer for the default setup.
 
 The branch `feat/local-ai-chat` includes the earlier staff dashboard and Agro Updates features. Its GitHub ZIP contains the whole updated project.
 
@@ -57,11 +57,48 @@ Set `OLLAMA_MODEL=qwen3:0.6b` in PyCharm's Run Configuration environment variabl
 | Setting/environment variable | Default | Purpose |
 | --- | --- | --- |
 | `AI_CHAT_ENABLED` | `true` | Set `false` to disable inference while retaining the ability to clear saved history. |
-| `OLLAMA_MODEL` | `qwen3:1.7b` | The two supported local model tags are `qwen3:1.7b` and `qwen3:0.6b`. |
+| `OLLAMA_MODEL` | `qwen3:1.7b` | Supported local tags: `qwen3:1.7b`, `qwen3:0.6b`, `qwen3:4b`. |
 | `OLLAMA_BASE_URL` | `http://127.0.0.1:11434` | Must remain an HTTP loopback address (`127.0.0.1`, `localhost`, `::1`). Remote/cloud URLs are rejected. |
 | `OLLAMA_TIMEOUT` (Django setting) | `120` | Local inference timeout in seconds. |
 
-Leave Ollama's network binding at localhost. The browser calls Django; Django calls Ollama. CORS changes and public exposure of port 11434 are unnecessary. To disable Ollama's cloud features globally as well, configure its `OLLAMA_NO_CLOUD=1` environment variable using Ollama's instructions and restart Ollama. RootLine itself already restricts requests to loopback and the two local model tags.
+Leave Ollama's network binding at localhost. The browser calls Django; Django calls Ollama. CORS changes and public exposure of port 11434 are unnecessary. To disable Ollama's cloud features globally as well, configure its `OLLAMA_NO_CLOUD=1` environment variable using Ollama's instructions and restart Ollama. RootLine itself already restricts requests to loopback and the supported local model tags.
+
+## Repetitive or irrelevant replies
+
+“Local AI is ready” checks connectivity and model installation, not answer quality. A small model may repeat questions, mix languages or produce incorrect Bangla. Old poor answers can also influence later replies.
+
+This update simplifies the prompt, explicitly chooses Bangla when the latest question contains Bangla script (English otherwise), and sets Ollama's repetition penalty. For transliterated Bangla, ask in Bangla script or use English. An obvious text loop or exact question echo is rejected with a clear error and is not saved. Old answers that trigger the loop check are excluded from inference context without deleting saved history. The check cannot detect every irrelevant or incorrect answer; it is not an accuracy guarantee. There are no automatic retries or canned farming answers.
+
+If you already installed the previous chat ZIP, only these files changed:
+
+- `chatbot/ollama.py`
+- `chatbot/tests.py`
+- `chatbot/README.md`
+
+Copy these files from the updated ZIP into your existing project, restart Django, select **Clear my history** below the chat, and test again. No new migration or npm install is required for this fix. Keep your existing database and environment configuration.
+
+Compare the website with a fresh real inference outside saved chat history:
+
+```sh
+python manage.py check_ollama --prompt "Why might tomato leaves turn yellow?"
+python manage.py check_ollama --prompt "টমেটো গাছের পাতা হলুদ হওয়ার সম্ভাব্য কারণ কী?"
+```
+
+If quality remains poor and your computer has sufficient memory, you can try the larger local model:
+
+```sh
+ollama pull qwen3:4b
+```
+
+Set `OLLAMA_MODEL=qwen3:4b` in **PyCharm → Run → Edit Configurations → your Django configuration → Environment variables**, then restart Django. When using PyCharm's Terminal instead, set it in that terminal before the check and server commands:
+
+```sh
+export OLLAMA_MODEL=qwen3:4b
+python manage.py check_ollama --prompt "Why might tomato leaves turn yellow?"
+python manage.py runserver
+```
+
+The model uses more memory and may run slower; suitability depends on RAM, processor and other apps. It still has no API subscription fee, and stronger does not guarantee correct farming advice. Do not switch to a smaller model expecting higher answer quality.
 
 ## History and privacy
 

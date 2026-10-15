@@ -46,6 +46,9 @@ class LocalClientTests(SimpleTestCase):
         self.assertEqual(payload['messages'][1]['content'], 'past 4')
         self.assertEqual(payload['messages'][-1]['content'], 'কম্পোস্ট কী?')
         self.assertEqual(len(payload['messages']), 8)
+        self.assertIn('write in Bangla', payload['messages'][0]['content'])
+        self.assertEqual(payload['options']['repeat_penalty'], 1.15)
+        self.assertEqual(payload['options']['repeat_last_n'], 256)
         self.assertNotIn('Authorization', request.headers)
         self.assertEqual(opener.open.call_args.kwargs['timeout'], 120)
 
@@ -108,6 +111,66 @@ class LocalClientTests(SimpleTestCase):
         self.assertEqual(ollama.status()['code'], 'bad_response')
 
 
+class ReplyQualityGuardTests(SimpleTestCase):
+    @patch('chatbot.ollama.request_json', return_value={'message': {'content': 'Check soil drainage and pH before planting.'}})
+    def test_latest_english_question_overrides_previous_bangla_context(self, request_json):
+        ollama.reply('What should I check before preparing soil?', [
+            {'role': 'user', 'content': 'কম্পোস্ট কী?'},
+            {'role': 'assistant', 'content': 'কম্পোস্ট মাটির জৈব উপাদান বাড়াতে সাহায্য করে।'},
+        ])
+        payload = request_json.call_args.kwargs['payload']
+        self.assertIn('write in English', payload['messages'][0]['content'])
+        self.assertEqual(len(payload['messages']), 4)
+
+    def test_repeated_bangla_sentences_from_report_are_detected(self):
+        answer = ('টোমাটো লেব লাল হওয়া বা সাধারণ কম্পোস্ট তৈরি করার পর জমি কাশার করার সময় কী পরীক্ষা হয়?\n' * 2)
+        self.assertTrue(ollama.is_repetitive(answer))
+
+    def test_repeated_english_phrases_without_line_breaks_are_detected(self):
+        self.assertTrue(ollama.is_repetitive('Check the soil before planting and check the drainage. ' * 5))
+
+    def test_normal_answers_and_short_repeated_terms_are_allowed(self):
+        for answer in [
+            'Soil pH matters. Soil drainage matters too.',
+            'Check drainage first. Then check the soil pH and organic matter. '
+            'Different crops need different conditions, so tell me which vegetables you want to grow '
+            'and whether water stays on the soil after rain.',
+            'মাটি ঝুরঝুরে আছে কি না দেখুন। পানি জমে থাকে কি না পরীক্ষা করুন। '
+            'কোন সবজি চাষ করবেন এবং আপনার জমি কোন জেলায় আছে জানালে আরও নির্দিষ্টভাবে বলা যাবে।',
+        ]:
+            with self.subTest(answer=answer):
+                self.assertFalse(ollama.is_repetitive(answer))
+
+    @patch('chatbot.ollama.request_json')
+    def test_bad_previous_answer_is_excluded_without_mutating_saved_context(self, request_json):
+        request_json.return_value = {'message': {'content': 'Several things can cause yellow leaves, including water stress.'}}
+        history = [{'role': 'user', 'content': 'Old question'},
+                   {'role': 'assistant', 'content': 'Check the soil before planting and check the drainage. ' * 5}]
+        ollama.reply('Why are tomato leaves yellow?', history)
+        self.assertEqual(len(request_json.call_args.kwargs['payload']['messages']), 2)
+        self.assertEqual(len(history), 2)
+
+    @patch('chatbot.ollama.request_json')
+    def test_generation_loop_is_rejected_with_no_automatic_retry(self, request_json):
+        request_json.return_value = {'message': {'content': 'Check the soil before planting and check the drainage. ' * 5}}
+        with self.assertRaises(ollama.LocalAIError) as error:
+            ollama.reply('What soil checks should I do?', [])
+        self.assertEqual(error.exception.code, 'repetitive_response')
+        request_json.assert_called_once()
+
+    @patch('chatbot.ollama.request_json')
+    def test_question_echo_is_rejected(self, request_json):
+        question = 'What should I check before preparing soil for vegetables?'
+        request_json.return_value = {'message': {'content': question}}
+        with self.assertRaises(ollama.LocalAIError) as error:
+            ollama.reply(question, [])
+        self.assertEqual(error.exception.code, 'repetitive_response')
+
+    @override_settings(OLLAMA_MODEL='qwen3:4b')
+    def test_larger_local_model_is_supported(self):
+        self.assertEqual(ollama.configuration()[1], 'qwen3:4b')
+
+
 class ChatFixtures(TestCase):
     @classmethod
     def setUpTestData(cls):
@@ -153,6 +216,14 @@ class ChatHistoryTests(ChatFixtures):
         self.assertEqual(response.json()['error'], 'Open Ollama first.')
         self.assertFalse(Message.objects.exists())
         self.assertFalse(Conversation.objects.exists())
+
+    @patch('chatbot.ollama.request_json')
+    def test_repetitive_output_is_not_saved_or_sent_as_a_successful_answer(self, request_json):
+        request_json.return_value = {'message': {'content': 'Check the soil before planting and check the drainage. ' * 5}}
+        response = self.post()
+        self.assertEqual(response.status_code, 503)
+        self.assertIn('repeated text', response.json()['error'])
+        self.assertFalse(Message.objects.exists())
 
     def test_clear_only_deletes_current_users_messages(self):
         store_turn(self.user, 0, 'Mine', 'My answer')
