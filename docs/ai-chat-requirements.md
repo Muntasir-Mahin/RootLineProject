@@ -1,6 +1,6 @@
-# RootLine AI chat: requirements before implementation
+# RootLine AI chat: local demo and future hosted requirements
 
-AI chat is not enabled by the Agro Updates release. No API key is requested or used in this code.
+The local demo is now implemented using Ollama in the `chatbot` app. It requires no subscription or API key. See `chatbot/README.md` for setup, supported local models, privacy and limitations. The requirements below describe a possible future hosted/API version, not a prerequisite for the local demo.
 
 ## Can ChatGPT Plus power the website?
 
@@ -24,7 +24,7 @@ Official references checked on 15 October 2026:
 6. **Privacy and operation:** keep each user's conversations private, let users delete their history, explain what gets sent to the model provider, and avoid sending account/payment/order details by default. Deploy using HTTPS and handle timeouts, provider downtime and exhausted quotas clearly.
 7. **Answer quality:** ask clarifying questions when crop, location or symptoms are missing; cite reliable material; be clear about uncertainty and the date of time-sensitive information. Avoid inventing chemical application instructions or presenting uncertain crop diagnosis as a confirmed fact. Give a route to local agricultural expertise when needed.
 
-## Proposed implementation once these choices are settled
+## Future hosted/API version
 
 - `/ask-rootline/`: chat page in the existing navigation, using the user's existing RootLine login.
 - A protected Django POST endpoint calls the chosen provider on the server.
@@ -34,4 +34,4 @@ Official references checked on 15 October 2026:
 - Trusted-document retrieval and source citations where agricultural factual advice requires grounding.
 - No connection to payment, escrow or other decision services; the chat cannot perform marketplace actions.
 
-Before implementation, settle the provider, an initial monthly budget, the expected number of daily questions and whether Bangla should be the default response language.
+Before a hosted/API upgrade, settle the provider, an initial monthly budget, expected daily questions and language requirements. These paid-service choices do not apply to running the current Ollama demo on your own laptop.

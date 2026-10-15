@@ -27,6 +27,7 @@
       <section aria-labelledby="quick-links-title">
         <div class="section-heading"><h3 id="quick-links-title">Your everyday essentials</h3><span>Quick links</span></div>
         <div class="shortcut-grid">
+          <a href="{% url 'chatbot:chat' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='leaf' %}</span><span><strong>Ask RootLine</strong><small>Chat about farming in Bangla or English</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
           <a href="{% url 'agro_updates:index' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='leaf' %}</span><span><strong>Agro Updates</strong><small>Watch farming news and practical guides</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>
           {% if user.is_staff or user.is_superuser %}<a href="{% url 'dashboard:overview' %}" class="shortcut surface"><span><strong>Staff dashboard</strong><small>Open your RootLine workspace</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>{% endif %}
           <a href="{% url 'marketplace' %}" class="shortcut surface"><span class="shortcut-icon">{% include 'components/icon.html' with name='bag' %}</span><span><strong>Marketplace</strong><small>Find your next fresh favorite</small></span><span class="shortcut-arrow">{% include 'components/icon.html' with name='arrow' %}</span></a>

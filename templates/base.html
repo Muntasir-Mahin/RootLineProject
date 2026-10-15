@@ -18,6 +18,7 @@
 <link rel="stylesheet" href="{% static 'css/output.css' %}">
 <link rel="stylesheet" href="{% static 'css/theme.css' %}">
 {% block extra_css %}{% endblock %}
+{% block extra_js %}{% endblock %}
 <script src="{% static 'js/password-toggle.js' %}" defer></script>
 <script src="{% static 'js/number-inputs.js' %}" defer></script>
 
@@ -62,6 +63,8 @@
             Marketplace
         </a>
 
+
+        <a href="{% url 'chatbot:chat' %}" class="hover:text-green-200">Ask RootLine</a>
 
         <a href="{% url 'agro_updates:index' %}" class="hover:text-green-200">Agro Updates</a>
 

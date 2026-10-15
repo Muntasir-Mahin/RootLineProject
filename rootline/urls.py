@@ -20,6 +20,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 
 urlpatterns = [
+    path('ask-rootline/', include('chatbot.urls')),
     path('agro-updates/', include('agro_updates.urls')),
     path('dashboard/', include('dashboard.urls')),
     path('admin/', admin.site.urls),

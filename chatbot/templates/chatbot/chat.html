@@ -1,0 +1,27 @@
+{% extends 'base.html' %}{% load static %}
+{% block extra_css %}<link rel="stylesheet" href="{% static 'chatbot/chat.css' %}">{% endblock %}
+{% block extra_js %}<script src="{% static 'chatbot/chat.js' %}" defer></script>{% endblock %}
+{% block content %}
+<div class="ask-page" data-status-url="{% url 'chatbot:status' %}">
+  <header class="ask-heading"><div><p class="section-eyebrow">A LITTLE GUIDANCE FOR YOUR NEXT SEASON</p><h1>Ask RootLine</h1><p class="page-description">Explore farming questions in বাংলা or English, one conversation at a time.</p></div><a class="outline-action" href="{% url 'agro_updates:index' %}">Explore farming videos →</a></header>
+  <div class="ask-layout">
+    <section class="ask-workspace surface" aria-label="Chat with RootLine AI">
+      <header class="ask-toolbar"><div class="ask-assistant"><span class="ask-avatar" aria-hidden="true">{% include 'components/icon.html' with name='leaf' %}</span><div><strong>RootLine AI</strong><span class="ask-status" data-state="checking" role="status">{% if chat_enabled %}Checking local AI…{% else %}AI chat is switched off{% endif %}</span></div></div><button class="ask-check" type="button" data-check-connection {% if not chat_enabled %}disabled{% endif %}>Check connection</button></header>
+      <div class="ask-transcript" id="chat-transcript" role="log" aria-label="Conversation" aria-live="polite" aria-relevant="additions" tabindex="0">
+        {% if not chat_messages %}<div class="ask-welcome" id="chat-welcome"><span class="ask-welcome-icon" aria-hidden="true">{% include 'components/icon.html' with name='leaf' %}</span><h2>What would you like to grow?</h2><p>Ask about crops, soil, compost or everyday farming. Add your crop and location so the answer can be more useful.</p><p lang="bn">আপনার ফসল, এলাকা ও প্রশ্ন লিখুন—সহজভাবে শেখার শুরু এখানেই।</p></div>{% endif %}
+        {% for message in chat_messages %}<article class="ask-message ask-message-{{ message.role }}"><span class="ask-speaker">{% if message.role == 'user' %}You{% else %}RootLine AI{% endif %}</span><div class="ask-bubble" dir="auto">{{ message.content }}</div></article>{% endfor %}
+      </div>
+      <div class="ask-error" id="chat-error" role="alert" hidden></div>
+      <div class="ask-suggestions" aria-label="Example questions"><button type="button" data-question="কম্পোস্ট তৈরি করার সহজ উপায় কী?" lang="bn">কম্পোস্ট কীভাবে তৈরি করব?</button><button type="button" data-question="What should I check before preparing soil for vegetables?">Preparing soil</button><button type="button" data-question="Why might tomato leaves turn yellow? Ask me for any details you need.">Tomato plant care</button></div>
+      <form class="ask-composer" id="chat-form" action="{% url 'chatbot:send' %}" method="post">{% csrf_token %}<label for="chat-question">Your farming question / আপনার প্রশ্ন</label><div class="ask-input-row"><textarea id="chat-question" name="message" maxlength="2000" rows="3" required placeholder="Tell us about your crop, location and question…" {% if not chat_enabled %}disabled{% endif %}></textarea><button class="primary-action" type="submit" id="chat-send" {% if not chat_enabled %}disabled{% endif %}>Send <span aria-hidden="true">→</span></button></div><div class="ask-composer-footer"><span>Bangla &amp; English · Remembers recent messages</span><span id="chat-progress" role="status" hidden>Thinking… This may take a moment.</span></div></form>
+      <footer class="ask-history"><span>Your latest 30 messages are kept in your account.</span><form id="chat-clear-form" action="{% url 'chatbot:clear' %}" method="post">{% csrf_token %}<button type="submit" class="ask-clear" {% if not chat_messages %}disabled{% endif %}>Clear my history</button></form></footer>
+    </section>
+    <aside class="ask-guide">
+      <section class="surface ask-guide-card"><p class="section-eyebrow">HERE TO HELP YOU LEARN</p><h2>Ask a little.<br>Learn something useful.</h2><ul><li>Growing crops and caring for soil</li><li>Composting and water management</li><li>Understanding common plant symptoms</li><li>Finding your way around RootLine</li></ul><div class="ask-guide-note"><strong>Make your question specific</strong><p>Include your district, crop, growing stage and what you have noticed.</p></div></section>
+      <section class="ask-local"><span class="ask-local-label">LOCAL AI DEMO</span><h2>Runs on your computer</h2><p>Uses a local Ollama model with no paid API. Only your question and recent chat messages are sent to that local model.</p></section>
+      <p class="ask-caution">AI answers can be mistaken. This assistant does not have live weather, prices or news. Check crop treatments with a local agricultural officer.</p>
+    </aside>
+  </div>
+  <noscript><p class="ask-noscript">You can send questions and clear history using these forms without JavaScript. Keep Ollama running on the computer hosting RootLine.</p></noscript>
+</div>
+{% endblock %}
