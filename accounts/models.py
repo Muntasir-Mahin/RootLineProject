@@ -7,6 +7,7 @@ class User(AbstractUser):
     address = models.TextField(blank=True)
 
     seller_requested = models.BooleanField(default=False)
+    seller_requested_at = models.DateTimeField(null=True, blank=True)
     seller_approved = models.BooleanField(default=False)
 
     def __str__(self):

@@ -8,6 +8,7 @@ from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.views.decorators.cache import never_cache
 from django.views.decorators.http import require_GET, require_http_methods
+from dashboard.services import request_seller_access
 from .forms import RegisterForm, ProfileUpdateForm
 
 
@@ -51,9 +52,7 @@ def profile_view(request):
 @login_required
 def become_seller_view(request):
     if request.method == 'POST':
-        if not request.user.seller_requested and not request.user.seller_approved:
-            request.user.seller_requested = True
-            request.user.save(update_fields=['seller_requested'])
+        request_seller_access(request.user.pk)
 
         return redirect('profile')
 

@@ -97,3 +97,35 @@ def checkout_cart(cart_id, buyer, checkout_data):
 
     cart.items.filter(pk__in=[item.pk for item in items]).delete()
     return orders
+
+
+@transaction.atomic
+def update_seller_order(order_id, *, actor, action):
+    from dashboard.audit import DecisionError
+    from payments.services import refund_payment
+
+    order = Order.objects.select_for_update().get(pk=order_id)
+    if order.seller_id != actor.pk or not actor.seller_approved:
+        raise DecisionError('Only the approved seller can manage this order.')
+    payment = Payment.objects.select_for_update().filter(order=order).first()
+    if order.status == 'pending' and action == 'confirm':
+        order.status = 'confirmed'
+        order.save(update_fields=['status', 'updated_at'])
+    elif order.status == 'pending' and action == 'cancel':
+        if payment and payment.payment_status == 'paid':
+            refund_payment(payment.pk, actor=actor, note='Seller cancelled the order before confirmation.')
+        else:
+            order.status = 'cancelled'
+            order.save(update_fields=['status', 'updated_at'])
+        for item in order.items.order_by('product_id'):
+            Product.objects.filter(pk=item.product_id).update(
+                stock_quantity=F('stock_quantity') + item.quantity, is_available=True,
+            )
+    elif order.status == 'confirmed' and action == 'ship':
+        if not payment or payment.payment_status != 'paid' or payment.escrow_status != 'held':
+            raise DecisionError('Payment must be verified and held in escrow before shipping.')
+        order.status = 'shipped'
+        order.save(update_fields=['status', 'updated_at'])
+    else:
+        raise DecisionError('That action is no longer available for this order.')
+    return order

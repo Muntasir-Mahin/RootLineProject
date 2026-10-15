@@ -1,7 +1,6 @@
 from datetime import timedelta
 from decimal import Decimal
 
-from django.contrib import admin
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -193,7 +192,12 @@ class MarketplaceWorkflowTests(TestCase):
         self.post('update_order_status', order.pk, action='ship')
         order.refresh_from_db()
         self.assertEqual(order.status, 'confirmed')
-        admin.site._registry[Payment].verify_payment(None, Payment.objects.filter(pk=payment.pk))
+        owner = User.objects.create_superuser('workflow-owner', 'owner@example.com', 'Owner-password-943!')
+        self.client.force_login(owner)
+        self.assertEqual(self.client.post(reverse('admin:payments_payment_changelist'), {
+            'action': 'verify_payment', '_selected_action': [payment.pk],
+        }).status_code, 302)
+        self.client.force_login(self.seller)
         self.post('update_order_status', order.pk, action='ship')
         order.refresh_from_db()
         self.assertEqual(order.status, 'shipped')

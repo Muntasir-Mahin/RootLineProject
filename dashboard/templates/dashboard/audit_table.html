@@ -1,0 +1,3 @@
+<div class="table-wrap"><table><thead><tr><th>Who / when</th><th>Action / record</th><th>Summary</th><th>Note</th></tr></thead><tbody>
+{% for entry in page_obj %}<tr><td><strong>{{ entry.actor_name }}</strong><small>{{ entry.timestamp|date:'d M Y, H:i' }}</small></td><td><span class="pill">{{ entry.action }}</span><small>{{ entry.target }}</small></td><td>{{ entry.summary }}</td><td class="prose">{{ entry.note|default:'—'|linebreaksbr }}</td></tr>{% empty %}<tr><td colspan="4" class="empty">No activity yet. Staff decisions will appear here.</td></tr>{% endfor %}</tbody></table></div>
+{% include 'dashboard/pagination.html' %}

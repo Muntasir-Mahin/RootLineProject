@@ -1,0 +1,14 @@
+{% extends 'dashboard/base.html' %}{% block content %}
+<p class="intro">A clear view of the marketplace and the work waiting for your team.</p>
+<div class="cards queues">
+<div class="card"><span>Payments to verify</span><strong>{{ queue_sizes.payments }}</strong>{% if can_finance %}<a href="{% url 'dashboard:payments' %}">Review payments →</a>{% endif %}</div>
+<div class="card"><span>Open disputes</span><strong>{{ queue_sizes.disputes }}</strong>{% if can_support %}<a href="{% url 'dashboard:disputes' %}">Review disputes →</a>{% endif %}</div>
+<div class="card"><span>Products awaiting review</span><strong>{{ queue_sizes.products }}</strong>{% if can_catalogue %}<a href="{% url 'dashboard:products' %}">Review products →</a>{% endif %}</div>
+<div class="card"><span>Seller requests</span><strong>{{ queue_sizes.sellers }}</strong>{% if can_catalogue %}<a href="{% url 'dashboard:sellers' %}">Review sellers →</a>{% endif %}</div>
+</div>
+<h2>Marketplace funds</h2><div class="cards"><div class="card"><span>Held in escrow</span><strong>৳{{ money.held|floatformat:2 }}</strong></div><div class="card"><span>Released to sellers</span><strong>৳{{ money.released|floatformat:2 }}</strong></div><div class="card"><span>Commission earned</span><strong>৳{{ money.commission|floatformat:2 }}</strong></div><div class="card"><span>Refunded to buyers</span><strong>৳{{ money.refunded|floatformat:2 }}</strong></div></div>
+<div class="two-column"><section class="panel"><h2>Orders by status</h2><dl class="metric-list">{% for label, count in order_statuses %}<div><dt>{{ label }}</dt><dd>{{ count }}</dd></div>{% endfor %}</dl><a href="{% url 'dashboard:orders' %}">View orders →</a></section>
+<section class="panel"><h2>Auctions</h2><dl class="metric-list"><div><dt>Running now</dt><dd>{{ running_auctions }}</dd></div><div><dt>Ending within 24 hours</dt><dd>{{ ending_auctions }}</dd></div></dl><p class="muted">Running auctions have started and have not reached their end time.</p></section></div>
+<section class="panel"><h2>Waiting too long</h2><div class="cards">{% for item in overdue %}<div><span>{{ item.label }} · over {{ item.hours }} hours</span><p class="metric">{{ item.count }}</p>{% if item.allowed %}<a href="{% url item.url_name %}?overdue=1">Review overdue →</a>{% endif %}</div>{% endfor %}</div></section>
+<section class="panel"><h2>Latest staff actions</h2>{% include 'dashboard/audit_table.html' %}</section>
+{% endblock %}
